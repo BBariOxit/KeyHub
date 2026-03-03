@@ -32,9 +32,9 @@ import boy_with_laptop_image from "./boy_with_laptop_image.png";
 import checkmark from "./checkmark.png";
 import banner_1 from "./banner-1.png";
 import banner_2 from "./banner-2.png";
-import feature_pro1 from "./feature_pro1.webp";
-import feature_pro2 from "./feature_pro2.webp";
-import feature_pro3 from "./feature_pro3.webp";
+import feature_pro_1 from "./feature-pro-1.jpg";
+import feature_pro_2 from "./feature-pro-2.jpg";
+import feature_pro_3 from "./feature-pro-3.jpg";
 import product_details_page_apple_earphone_image1 from "./product_details_page_apple_earphone_image1.png";
 import product_details_page_apple_earphone_image2 from "./product_details_page_apple_earphone_image2.png";
 import product_details_page_apple_earphone_image3 from "./product_details_page_apple_earphone_image3.png";
@@ -94,9 +94,9 @@ export const assets = {
   banner_2,
   products_1,
   products_7,
-  feature_pro1,
-  feature_pro2,
-  feature_pro3,
+  feature_pro_1,
+  feature_pro_2,
+  feature_pro_3,
   products_2,
   products_3,
   products_4,

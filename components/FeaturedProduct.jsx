@@ -5,21 +5,21 @@ import Image from "next/image";
 const products = [
   {
     id: 1,
-    image: assets.feature_pro1,
-    title: "Unparalleled Sound",
-    description: "Experience crystal-clear audio with premium headphones.",
+    image: assets.feature_pro_1,
+    title: "RGB Gaming Keyboards",
+    description: "Hiệu ứng LED nổi bật, phản hồi nhanh cho mọi trận đấu.",
   },
   {
     id: 2,
-    image: assets.feature_pro2,
-    title: "Stay Connected",
-    description: "Compact and stylish earphones for every occasion.",
+    image: assets.feature_pro_2,
+    title: "Wireless & Clean Setup",
+    description: "Bàn phím không dây gọn gàng, tối ưu góc làm việc hiện đại.",
   },
   {
     id: 3,
-    image: assets.feature_pro3,
-    title: "Power in Every Pixel",
-    description: "Shop the latest laptops for work, gaming, and more.",
+    image: assets.feature_pro_3,
+    title: "Pro Typing Experience",
+    description: "Switch êm, cảm giác gõ chắc tay cho cả game lẫn công việc.",
   },
 ];
 
@@ -37,7 +37,7 @@ const FeaturedProduct = () => {
             <Image
               src={image}
               alt={title}
-              className="group-hover:brightness-75 transition duration-300 w-full h-auto object-cover"
+              className="group-hover:brightness-75 transition duration-300 w-full h-80 md:h-96 object-cover"
             />
             <div className="group-hover:-translate-y-4 transition duration-300 absolute bottom-8 left-8 text-white space-y-2">
               <p className="font-medium text-xl lg:text-2xl">{title}</p>
