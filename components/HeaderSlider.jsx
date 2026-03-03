@@ -10,7 +10,7 @@ const HeaderSlider = () => {
       offer: "Limited Time Offer 30% Off",
       buttonText1: "Buy now",
       buttonText2: "Find more",
-      imgSrc: assets.keyboard_list1,
+      imgSrc: assets.products_1,
     },
     {
       id: 2,
@@ -18,7 +18,7 @@ const HeaderSlider = () => {
       offer: "Hurry up only few lefts!",
       buttonText1: "Shop Now",
       buttonText2: "Explore Deals",
-      imgSrc: assets.keyboard_list2,
+      imgSrc: assets.products_7,
     },
     {
       id: 3,
@@ -26,7 +26,7 @@ const HeaderSlider = () => {
       offer: "Exclusive Deal 40% Off",
       buttonText1: "Order Now",
       buttonText2: "Learn More",
-      imgSrc: assets.keyboard_list3,
+      imgSrc: assets.products_10,
     },
   ];
 
@@ -71,9 +71,9 @@ const HeaderSlider = () => {
                 </button>
               </div>
             </div>
-            <div className="flex items-center flex-1 justify-center">
+            <div className="flex items-center flex-1 justify-center md:justify-end md:pr-6 w-full md:w-auto">
               <Image
-                className="md:w-72 w-48"
+                className="w-[260px] md:w-[420px] lg:w-[500px] h-[140px] md:h-[220px] lg:h-[260px] object-contain"
                 src={slide.imgSrc}
                 alt={`Slide ${index + 1}`}
               />
