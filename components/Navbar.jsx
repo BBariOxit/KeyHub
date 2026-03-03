@@ -19,19 +19,19 @@ const Navbar = () => {
       />
       <div className="flex items-center gap-4 lg:gap-8 max-md:hidden">
         <Link href="/" className="hover:text-gray-900 transition">
-          Home
+          Trang chủ
         </Link>
         <Link href="/all-products" className="hover:text-gray-900 transition">
-          Shop
+          Cửa hàng
         </Link>
         <Link href="/" className="hover:text-gray-900 transition">
-          About Us
+          Giới thiệu
         </Link>
         <Link href="/" className="hover:text-gray-900 transition">
-          Contact
+          Liên hệ
         </Link>
 
-        {isSeller && <button onClick={() => router.push('/seller')} className="text-xs border px-4 py-1.5 rounded-full">Seller Dashboard</button>}
+        {isSeller && <button onClick={() => router.push('/seller')} className="text-xs border px-4 py-1.5 rounded-full">Kênh người bán</button>}
 
       </div>
 
@@ -39,15 +39,15 @@ const Navbar = () => {
         <Image className="w-4 h-4" src={assets.search_icon} alt="search icon" />
         <button className="flex items-center gap-2 hover:text-gray-900 transition">
           <Image src={assets.user_icon} alt="user icon" />
-          Account
+          Tài khoản
         </button>
       </ul>
 
       <div className="flex items-center md:hidden gap-3">
-        {isSeller && <button onClick={() => router.push('/seller')} className="text-xs border px-4 py-1.5 rounded-full">Seller Dashboard</button>}
+        {isSeller && <button onClick={() => router.push('/seller')} className="text-xs border px-4 py-1.5 rounded-full">Kênh người bán</button>}
         <button className="flex items-center gap-2 hover:text-gray-900 transition">
           <Image src={assets.user_icon} alt="user icon" />
-          Account
+          Tài khoản
         </button>
       </div>
     </nav>

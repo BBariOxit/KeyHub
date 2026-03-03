@@ -1,0 +1,5 @@
+<svg width="150" height="34" viewBox="0 0 150 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="1" y="1" width="32" height="32" rx="8" fill="#FF532E"/>
+  <path d="M10 23V11H13V16.2L18.2 11H22L16.6 16.3L22.2 23H18.3L14.4 18.1L13 19.5V23H10Z" fill="white"/>
+  <text x="42" y="23" fill="#1F2937" font-family="'Be Vietnam Pro', Arial, sans-serif" font-size="22" font-weight="700">Keyhub</text>
+</svg>

@@ -1,4 +1,4 @@
-import logo from "./logo.svg";
+import logo from "./keyhub_logo.svg";
 import search_icon from "./search_icon.svg";
 import user_icon from "./user_icon.svg";
 import cart_icon from "./cart_icon.svg";
@@ -20,26 +20,13 @@ import heart_icon from "./heart_icon.svg";
 import star_icon from "./star_icon.svg";
 import redirect_icon from "./redirect_icon.svg";
 import star_dull_icon from "./star_dull_icon.svg";
-import header_playstation_image from "./header_playstation_image.png";
-import header_macbook_image from "./header_macbook_image.png";
 import upload_area from "./upload_area.png";
-//import girl_with_headphone_image from "./girl_with_headphone_image.png";
-import girl_with_earphone_image from "./girl_with_earphone_image.png";
-import md_controller_image from "./md_controller_image.png";
-import sm_controller_image from "./sm_controller_image.png";
-import jbl_soundbox_image from "./jbl_soundbox_image.png";
-import boy_with_laptop_image from "./boy_with_laptop_image.png";
 import checkmark from "./checkmark.png";
 import banner_1 from "./banner-1.png";
 import banner_2 from "./banner-2.png";
 import feature_pro_1 from "./feature-pro-1.jpg";
 import feature_pro_2 from "./feature-pro-2.jpg";
 import feature_pro_3 from "./feature-pro-3.jpg";
-import product_details_page_apple_earphone_image1 from "./product_details_page_apple_earphone_image1.png";
-import product_details_page_apple_earphone_image2 from "./product_details_page_apple_earphone_image2.png";
-import product_details_page_apple_earphone_image3 from "./product_details_page_apple_earphone_image3.png";
-import product_details_page_apple_earphone_image4 from "./product_details_page_apple_earphone_image4.png";
-import product_details_page_apple_earphone_image5 from "./product_details_page_apple_earphone_image5.png";
 import products_1 from "./products-1.png";
 import products_2 from "./products-2.png";
 import products_3 from "./products-3.png";
@@ -75,33 +62,20 @@ export const assets = {
   star_icon,
   redirect_icon,
   star_dull_icon,
-  header_playstation_image,
-  header_macbook_image,
   upload_area,
-  //girl_with_headphone_image,
-  girl_with_earphone_image,
-  md_controller_image,
-  sm_controller_image,
-  jbl_soundbox_image,
-  boy_with_laptop_image,
-  product_details_page_apple_earphone_image1,
-  product_details_page_apple_earphone_image2,
-  product_details_page_apple_earphone_image3,
-  product_details_page_apple_earphone_image4,
-  product_details_page_apple_earphone_image5,
   checkmark,
   banner_1,
   banner_2,
-  products_1,
-  products_7,
   feature_pro_1,
   feature_pro_2,
   feature_pro_3,
+  products_1,
   products_2,
   products_3,
   products_4,
   products_5,
   products_6,
+  products_7,
   products_8,
   products_9,
   products_10
