@@ -1,19 +1,19 @@
-import { Outfit } from "next/font/google";
+import { Be_Vietnam_Pro } from "next/font/google";
 import "./globals.css";
 import { AppContextProvider } from "@/context/AppContext";
 import { Toaster } from "react-hot-toast";
 
-const outfit = Outfit({ subsets: ['latin'], weight: ["300", "400", "500"] })
+const beVietnamPro = Be_Vietnam_Pro({ subsets: ['latin', 'vietnamese'], weight: ["400", "500", "600", "700"] })
 
 export const metadata = {
-  title: "QuickCart - GreatStack",
+  title: "Keyhub",
   description: "E-Commerce with Next.js ",
 };
 
 export default function RootLayout({ children }) {
   return (
-      <html lang="en">
-        <body className={`${outfit.className} antialiased text-gray-700`} >
+      <html lang="vi">
+        <body className={`${beVietnamPro.className} antialiased text-gray-700`} >
           <Toaster />
           <AppContextProvider>
             {children}

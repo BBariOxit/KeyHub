@@ -6,27 +6,27 @@ const HeaderSlider = () => {
   const sliderData = [
     {
       id: 1,
-      title: "Experience Pure Sound - Your Perfect Headphones Awaits!",
-      offer: "Limited Time Offer 30% Off",
-      buttonText1: "Buy now",
-      buttonText2: "Find more",
-      imgSrc: assets.keyboard_list1,
+      title: "Bàn phím cơ RGB - Tăng tốc mọi trận đấu",
+      offer: "Ưu đãi giới hạn giảm đến 30%",
+      buttonText1: "Mua ngay",
+      buttonText2: "Xem thêm",
+      imgSrc: assets.products_1,
     },
     {
       id: 2,
-      title: "Next-Level Gaming Starts Here - Discover PlayStation 5 Today!",
-      offer: "Hurry up only few lefts!",
-      buttonText1: "Shop Now",
-      buttonText2: "Explore Deals",
-      imgSrc: assets.keyboard_list2,
+      title: "Thiết kế gọn gàng, hiệu năng ổn định cho mọi setup",
+      offer: "Số lượng có hạn",
+      buttonText1: "Mua ngay",
+      buttonText2: "Khám phá",
+      imgSrc: assets.products_7,
     },
     {
       id: 3,
-      title: "Power Meets Elegance - Apple MacBook Pro is Here for you!",
-      offer: "Exclusive Deal 40% Off",
-      buttonText1: "Order Now",
-      buttonText2: "Learn More",
-      imgSrc: assets.keyboard_list3,
+      title: "Cảm giác gõ cao cấp cho game thủ và dân văn phòng",
+      offer: "Giảm thêm 10% hôm nay",
+      buttonText1: "Đặt ngay",
+      buttonText2: "Tìm hiểu",
+      imgSrc: assets.products_10,
     },
   ];
 
@@ -56,9 +56,9 @@ const HeaderSlider = () => {
             key={slide.id}
             className="flex flex-col-reverse md:flex-row items-center justify-between bg-[#E6E9F2] py-8 md:px-14 px-5 mt-6 rounded-xl min-w-full"
           >
-            <div className="md:pl-8 mt-10 md:mt-0">
+            <div className="md:pl-8 mt-10 md:mt-0 md:flex-1">
               <p className="md:text-base text-orange-600 pb-1">{slide.offer}</p>
-              <h1 className="max-w-lg md:text-[40px] md:leading-[48px] text-2xl font-semibold">
+              <h1 className="max-w-xl md:max-w-[42rem] md:text-[40px] md:leading-[48px] text-2xl font-semibold">
                 {slide.title}
               </h1>
               <div className="flex items-center mt-4 md:mt-6 ">
@@ -71,9 +71,9 @@ const HeaderSlider = () => {
                 </button>
               </div>
             </div>
-            <div className="flex items-center flex-1 justify-center">
+            <div className="flex items-center flex-1 justify-center md:justify-end md:pr-6 w-full md:w-auto">
               <Image
-                className="md:w-72 w-48"
+                className="w-[260px] md:w-[420px] lg:w-[500px] h-[140px] md:h-[220px] lg:h-[260px] object-contain"
                 src={slide.imgSrc}
                 alt={`Slide ${index + 1}`}
               />
