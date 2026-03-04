@@ -8,6 +8,11 @@ const beVietnamPro = Be_Vietnam_Pro({ subsets: ['latin', 'vietnamese'], weight: 
 export const metadata = {
   title: "Keyhub",
   description: "E-Commerce with Next.js ",
+  icons: {
+    icon: "/icon.svg?v=1",
+    shortcut: "/icon.svg?v=1",
+    apple: "/icon.svg?v=1",
+  },
 };
 
 export default function RootLayout({ children }) {
