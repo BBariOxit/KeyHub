@@ -269,126 +269,120 @@ export const userDummyData = {
 
 export const orderDummyData = [
   {
-    "_id": "67a20934b3db72db5cc77b2b",
+    "_id": "67b30111b3db72db5cc77c01",
     "userId": "user_2sZFHS1UIIysJyDVzCpQhUhTIhw",
     "items": [
       {
         "product": {
           "_id": "67a1f4e43f34a77b6dde9144",
           "userId": "user_2sZFHS1UIIysJyDVzCpQhUhTIhw",
-          "name": "Apple AirPods Pro",
-          "description": "Apple AirPods Pro (2nd Gen) with MagSafe Case (USB-C) provide excellent sound, active noise cancellation, and a comfortable fit. The USB-C case ensures quick charging, and they pair seamlessly with Apple devices for an effortless audio experience.",
+          "name": "Aurora K68",
+          "description": "Bàn phím cơ gaming full-size, LED RGB và keycap PBT bền đẹp.",
           "price": 499.99,
           "offerPrice": 399.99,
           "image": [
-            "https://res.cloudinary.com/djbvf02yt/image/upload/v1738667237/lrllaprpos2pnp5c9pyy.png",
-            "https://res.cloudinary.com/djbvf02yt/image/upload/v1738667238/jqotgy2rvm36vfjv6lxl.png",
-            "https://res.cloudinary.com/djbvf02yt/image/upload/v1738667238/niw7tqxvjsxt7wcehxeo.png",
-            "https://res.cloudinary.com/djbvf02yt/image/upload/v1738667237/h8cq4x9cfzqzwaiarvpk.png"
+            products_1
           ],
-          "category": "Earphone",
+          "category": "Keyboard",
           "date": 1738667236865,
           "__v": 0
         },
-        "quantity": 1,
-        "_id": "67a20934b3db72db5cc77b2c"
+        "quantity": 2,
+        "_id": "67b30111b3db72db5cc77c02"
       }
     ],
-    "amount": 406.99,
+    "amount": 799.98,
     "address": {
-      "_id": "67a1e4233f34a77b6dde9055",
+      "_id": "67b30111b3db72db5cc77c03",
       "userId": "user_2sZFHS1UIIysJyDVzCpQhUhTIhw",
-      "fullName": "GreatStack",
-      "phoneNumber": "0123456789",
-      "pincode": 654321,
-      "area": "Main Road , 123 Street, G Block",
-      "city": "City",
-      "state": "State",
+      "fullName": "Nguyễn Văn Minh",
+      "phoneNumber": "0909123456",
+      "pincode": 700000,
+      "area": "215 Nguyễn Trãi, Phường Bến Thành",
+      "city": "TP. Hồ Chí Minh",
+      "state": "Việt Nam",
       "__v": 0
     },
-    "status": "Order Placed",
-    "date": 1738672426822,
+    "status": "Đã đặt hàng",
+    "date": 1741046400000,
     "__v": 0
   },
   {
-    "_id": "67a20949b3db72db5cc77b2e",
+    "_id": "67b30122b3db72db5cc77c04",
     "userId": "user_2sZFHS1UIIysJyDVzCpQhUhTIhw",
     "items": [
       {
         "product": {
           "_id": "67a1f52e3f34a77b6dde914a",
           "userId": "user_2sZFHS1UIIysJyDVzCpQhUhTIhw",
-          "name": "Bose QuietComfort 45",
-          "description": "The Bose QuietComfort 45 headphones are engineered for exceptional sound quality and unparalleled noise cancellation. With a 24-hour battery life and comfortable, lightweight design, these headphones deliver premium audio for any environment. Whether on a flight, in the office, or at home, the Bose QC45 blocks out distractions, offering an immersive listening experience.",
+          "name": "TriMode K87",
+          "description": "Bàn phím cơ Bluetooth 3 chế độ, pin lâu, dùng linh hoạt cho nhiều thiết bị.",
           "price": 429.99,
           "offerPrice": 329.99,
           "image": [
-            "https://res.cloudinary.com/djbvf02yt/image/upload/v1738667311/m16coelz8ivkk9f0nwrz.png"
+            products_5
           ],
-          "category": "Headphone",
+          "category": "Keyboard",
           "date": 1738667310300,
           "__v": 0
         },
         "quantity": 1,
-        "_id": "67a20949b3db72db5cc77b2f"
+        "_id": "67b30122b3db72db5cc77c05"
       }
     ],
-    "amount": 335.99,
+    "amount": 329.99,
     "address": {
-      "_id": "67a1e4233f34a77b6dde9055",
+      "_id": "67b30122b3db72db5cc77c06",
       "userId": "user_2sZFHS1UIIysJyDVzCpQhUhTIhw",
-      "fullName": "GreatStack",
-      "phoneNumber": "0123456789",
-      "pincode": 654321,
-      "area": "Main Road , 123 Street, G Block",
-      "city": "City",
-      "state": "State",
+      "fullName": "Trần Thu Hà",
+      "phoneNumber": "0988123456",
+      "pincode": 100000,
+      "area": "58 Phố Huế, Phường Ngô Thì Nhậm",
+      "city": "Hà Nội",
+      "state": "Việt Nam",
       "__v": 0
     },
-    "status": "Order Placed",
-    "date": 1738672448031,
+    "status": "Đang giao",
+    "date": 1741132800000,
     "__v": 0
   },
   {
-    "_id": "67a209bab3db72db5cc77b34",
+    "_id": "67b30133b3db72db5cc77c07",
     "userId": "user_2sZFHS1UIIysJyDVzCpQhUhTIhw",
     "items": [
       {
         "product": {
-          "_id": "67a1f4e43f34a77b6dde9144",
+          "_id": "67a1f85e3f34a77b6dde915e",
           "userId": "user_2sZFHS1UIIysJyDVzCpQhUhTIhw",
-          "name": "Apple AirPods Pro",
-          "description": "Apple AirPods Pro (2nd Gen) with MagSafe Case (USB-C) provide excellent sound, active noise cancellation, and a comfortable fit. The USB-C case ensures quick charging, and they pair seamlessly with Apple devices for an effortless audio experience.",
-          "price": 499.99,
-          "offerPrice": 399.99,
+          "name": "Stealth FPS 80",
+          "description": "Bàn phím cơ silent switch, anti-ghosting đầy đủ, tối ưu cho game FPS.",
+          "price": 1699.99,
+          "offerPrice": 1499.99,
           "image": [
-            "https://res.cloudinary.com/djbvf02yt/image/upload/v1738667237/lrllaprpos2pnp5c9pyy.png",
-            "https://res.cloudinary.com/djbvf02yt/image/upload/v1738667238/jqotgy2rvm36vfjv6lxl.png",
-            "https://res.cloudinary.com/djbvf02yt/image/upload/v1738667238/niw7tqxvjsxt7wcehxeo.png",
-            "https://res.cloudinary.com/djbvf02yt/image/upload/v1738667237/h8cq4x9cfzqzwaiarvpk.png"
+            products_9
           ],
-          "category": "Earphone",
-          "date": 1738667236865,
+          "category": "Keyboard",
+          "date": 1738668126660,
           "__v": 0
         },
         "quantity": 1,
-        "_id": "67a209bab3db72db5cc77b35"
+        "_id": "67b30133b3db72db5cc77c08"
       }
     ],
-    "amount": 406.99,
+    "amount": 1499.99,
     "address": {
-      "_id": "67a1e4233f34a77b6dde9055",
+      "_id": "67b30133b3db72db5cc77c09",
       "userId": "user_2sZFHS1UIIysJyDVzCpQhUhTIhw",
-      "fullName": "GreatStack",
-      "phoneNumber": "0123456789",
-      "pincode": 654321,
-      "area": "Main Road , 123 Street, G Block",
-      "city": "City",
-      "state": "State",
+      "fullName": "Lê Quốc Bảo",
+      "phoneNumber": "0911222333",
+      "pincode": 550000,
+      "area": "12 Lê Duẩn, Phường Hải Châu I",
+      "city": "Đà Nẵng",
+      "state": "Việt Nam",
       "__v": 0
     },
-    "status": "Order Placed",
-    "date": 1738672560698,
+    "status": "Đã giao",
+    "date": 1741219200000,
     "__v": 0
   }
 ]

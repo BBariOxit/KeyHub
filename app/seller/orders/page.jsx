@@ -25,24 +25,24 @@ const Orders = () => {
     return (
         <div className="flex-1 h-screen overflow-scroll flex flex-col justify-between text-sm">
             {loading ? <Loading /> : <div className="md:p-10 p-4 space-y-5">
-                <h2 className="text-lg font-medium">Orders</h2>
-                <div className="max-w-4xl rounded-md">
+                <h2 className="text-lg font-medium">Đơn hàng</h2>
+                <div className="max-w-6xl rounded-md">
                     {orders.map((order, index) => (
-                        <div key={index} className="flex flex-col md:flex-row gap-5 justify-between p-5 border-t border-gray-300">
-                            <div className="flex-1 flex gap-5 max-w-80">
+                        <div key={index} className="grid grid-cols-1 md:grid-cols-[2fr_2.2fr_1fr_1.6fr] gap-6 md:gap-8 p-6 border-t border-gray-300">
+                            <div className="flex items-start gap-4 min-w-0">
                                 <Image
-                                    className="max-w-16 max-h-16 object-cover"
+                                    className="w-16 h-16 object-cover shrink-0"
                                     src={assets.box_icon}
                                     alt="box_icon"
                                 />
-                                <p className="flex flex-col gap-3">
-                                    <span className="font-medium">
+                                <p className="flex flex-col gap-2 min-w-0 leading-7">
+                                    <span className="font-medium text-base break-words">
                                         {order.items.map((item) => item.product.name + ` x ${item.quantity}`).join(", ")}
                                     </span>
-                                    <span>Items : {order.items.length}</span>
+                                    <span>Số sản phẩm: {order.items.length}</span>
                                 </p>
                             </div>
-                            <div>
+                            <div className="leading-7">
                                 <p>
                                     <span className="font-medium">{order.address.fullName}</span>
                                     <br />
@@ -53,12 +53,12 @@ const Orders = () => {
                                     <span>{order.address.phoneNumber}</span>
                                 </p>
                             </div>
-                            <p className="font-medium my-auto">{currency}{order.amount}</p>
-                            <div>
+                            <p className="font-semibold md:text-lg md:self-center">{currency}{order.amount}</p>
+                            <div className="leading-7 md:pl-2">
                                 <p className="flex flex-col">
-                                    <span>Method : COD</span>
-                                    <span>Date : {new Date(order.date).toLocaleDateString()}</span>
-                                    <span>Payment : Pending</span>
+                                    <span>Phương thức: COD</span>
+                                    <span>Ngày: {new Date(order.date).toLocaleDateString('vi-VN')}</span>
+                                    <span>Thanh toán: Chưa thanh toán</span>
                                 </p>
                             </div>
                         </div>
