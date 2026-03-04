@@ -2,6 +2,7 @@ import { Be_Vietnam_Pro } from "next/font/google";
 import "./globals.css";
 import { AppContextProvider } from "@/context/AppContext";
 import { Toaster } from "react-hot-toast";
+import { ClerkProvider } from "@clerk/nextjs";
 
 const beVietnamPro = Be_Vietnam_Pro({ subsets: ['latin', 'vietnamese'], weight: ["400", "500", "600", "700"] })
 
@@ -17,6 +18,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
+    <ClerkProvider>
       <html lang="vi">
         <body className={`${beVietnamPro.className} antialiased text-gray-700`} >
           <Toaster />
@@ -25,5 +27,6 @@ export default function RootLayout({ children }) {
           </AppContextProvider>
         </body>
       </html>
+    </ClerkProvider>
   );
 }
