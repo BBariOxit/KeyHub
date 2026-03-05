@@ -258,9 +258,9 @@ export const productsDummyData = [
 
 export const userDummyData = {
   "_id": "user_2sZFHS1UIIysJyDVzCpQhUhTIhw",
-  "name": "GreatStack",
+  "name": "phanbao",
   "email": "admin@example.com",
-  "imageUrl": "https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18ycnlnUnFiUDBYT2dEZ2h1ZmRXcGlpdWV5OXoiLCJyaWQiOiJ1c2VyXzJzWkZIUzFVSUl5c0p5RFZ6Q3BRaFVoVElodyJ9",
+  "imageUrl": "https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZ29vZ2xlL2ltZ18zQVdoVlQxVmRPa3dCYU1HN2RRTUMyUGZjYm0ifQ",
   "cartItems": {
     // "67a1f4e43f34a77b6dde9144": 3
   },
