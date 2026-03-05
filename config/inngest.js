@@ -14,16 +14,20 @@ export const syncUserCreation = inngest.createFunction(
   {
     event: 'clerk/user.created'
   },
-  async ({event}) => {
+  async ({event, step}) => {
     const { id, first_name, last_name, email_addresses, image_url } = event.data
     const userData = {
       _id: id,
       email: email_addresses[0].email_address,
-      name: first_name + ' ' + last_name,
+      name: `${first_name} ${last_name}`,
       imageUrl: image_url
     }
-    await connectDB()
-    await User.create(userData)
+    await step.run("connect-to-db", async () => {
+      await connectDB()
+    })
+    await step.run("save-user-to-db", async () => {
+      return await User.findOneAndUpdate({ _id: id }, userData, { upsert: true })
+    })
   }
 )
 
@@ -35,16 +39,20 @@ export const syncUserUpdation = inngest.createFunction(
   {
     event: 'clerk/user.updated'
   },
-  async ({event}) => {
+  async ({event, step}) => {
     const { id, first_name, last_name, email_addresses, image_url } = event.data
     const userData = {
       _id: id,
       email: email_addresses[0].email_address,
-      name: first_name + ' ' + last_name,
+      name: `${first_name} ${last_name}`,
       imageUrl: image_url
     }
-    await connectDB()
-    await User.findByIdAndUpdate(id, userData)
+    await step.run("connect-to-db", async () => {
+      await connectDB()
+    })
+    await step.run("update-user-in-db", async () => {
+      return await User.findByIdAndUpdate(id, userData)
+    })
   }
 )
 
@@ -56,9 +64,13 @@ export const syncUserDeletion = inngest.createFunction(
   { 
     event: 'clerk/user.deleted'
   },
-  async ({event}) => {
+  async ({event, step}) => {
     const { id } = event.data
-    await connectDB()
-    await User.findByIdAndDelete(id)
+    await step.run("connect-to-db", async () => {
+      await connectDB()
+    })
+    await step.run("delete-user-from-db", async () => {
+      return await User.findByIdAndDelete(id)
+    })
   }
 )
