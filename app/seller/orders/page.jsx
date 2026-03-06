@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
 import Footer from "@/components/seller/Footer";
 import Loading from "@/components/Loading";
+import { formatVnd } from "@/lib/price";
 
 const Orders = () => {
 
@@ -53,7 +54,7 @@ const Orders = () => {
                                     <span>{order.address.phoneNumber}</span>
                                 </p>
                             </div>
-                            <p className="font-semibold md:text-lg md:self-center">{currency}{order.amount}</p>
+                            <p className="font-semibold md:text-lg md:self-center">{formatVnd(order.amount)} {currency}</p>
                             <div className="leading-7 md:pl-2">
                                 <p className="flex flex-col">
                                     <span>Phương thức: COD</span>

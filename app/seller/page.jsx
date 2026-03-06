@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { formatThousandsInput, getNumericString } from "@/lib/price";
 
 const AddProduct = () => {
 
@@ -24,8 +25,8 @@ const AddProduct = () => {
     formData.append('name', name)
     formData.append('description', description)
     formData.append('category', category)
-    formData.append('price', price)
-    formData.append('offerPrice', offerPrice)
+    formData.append('price', getNumericString(price))
+    formData.append('offerPrice', getNumericString(offerPrice))
 
     for (let i = 0; i < files.length; i++) {
       formData.append('images', files[i])
@@ -47,7 +48,7 @@ const AddProduct = () => {
         toast.error(data.message)
       }
     } catch (error) {
-      toast.error(error.message)
+      toast.error(error.response?.data?.message || error.message)
     }
 
   };
@@ -136,11 +137,12 @@ const AddProduct = () => {
             </label>
             <input
               id="product-price"
-              type="number"
+              type="text"
+              inputMode="numeric"
               placeholder="0"
               className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
-              onChange={(e) => setPrice(e.target.value)}
-              value={price}
+              onChange={(e) => setPrice(getNumericString(e.target.value))}
+              value={formatThousandsInput(price)}
               required
             />
           </div>
@@ -150,11 +152,12 @@ const AddProduct = () => {
             </label>
             <input
               id="offer-price"
-              type="number"
+              type="text"
+              inputMode="numeric"
               placeholder="0"
               className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
-              onChange={(e) => setOfferPrice(e.target.value)}
-              value={offerPrice}
+              onChange={(e) => setOfferPrice(getNumericString(e.target.value))}
+              value={formatThousandsInput(offerPrice)}
               required
             />
           </div>
