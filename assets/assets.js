@@ -119,8 +119,8 @@ export const productsDummyData = [
     "userId": "user_2sZFHS1UIIysJyDVzCpQhUhTIhw",
     "name": "Aurora K68",
     "description": "Bàn phím cơ gaming full-size, LED RGB và keycap PBT bền đẹp.",
-    "price": 499.99,
-    "offerPrice": 399.99,
+    "price": 2290000,
+    "offerPrice": 1790000,
     "image": [
       products_1
     ],
@@ -133,8 +133,8 @@ export const productsDummyData = [
     "userId": "user_2sZFHS1UIIysJyDVzCpQhUhTIhw",
     "name": "Nova TKL X",
     "description": "Bàn phím cơ layout TKL gọn gàng, switch linear cho cảm giác gõ mượt.",
-    "price": 429.99,
-    "offerPrice": 329.99,
+    "price": 1990000,
+    "offerPrice": 1590000,
     "image": [
       products_2
     ],
@@ -147,8 +147,8 @@ export const productsDummyData = [
     "userId": "user_2sZFHS1UIIysJyDVzCpQhUhTIhw",
     "name": "Phantom 75 Pro",
     "description": "Bàn phím cơ 75%, thiết kế tối giản, hỗ trợ hot-swap thay switch nhanh.",
-    "price": 899.99,
-    "offerPrice": 799.99,
+    "price": 4590000,
+    "offerPrice": 3990000,
     "image": [
       products_3
     ],
@@ -161,8 +161,8 @@ export const productsDummyData = [
     "userId": "user_2sZFHS1UIIysJyDVzCpQhUhTIhw",
     "name": "SilentFlow V2",
     "description": "Bàn phím văn phòng chống ồn, switch tactile, tối ưu cho làm việc dài giờ.",
-    "price": 399.99,
-    "offerPrice": 349.99,
+    "price": 1690000,
+    "offerPrice": 1390000,
     "image": [
       products_4
     ],
@@ -175,8 +175,8 @@ export const productsDummyData = [
     "userId": "user_2sZFHS1UIIysJyDVzCpQhUhTIhw",
     "name": "TriMode K87",
     "description": "Bàn phím cơ Bluetooth 3 chế độ, pin lâu, dùng linh hoạt cho nhiều thiết bị.",
-    "price": 599.99,
-    "offerPrice": 499.99,
+    "price": 3190000,
+    "offerPrice": 2790000,
     "image": [
       products_5
     ],
@@ -189,8 +189,8 @@ export const productsDummyData = [
     "userId": "user_2sZFHS1UIIysJyDVzCpQhUhTIhw",
     "name": "Forge Custom 98",
     "description": "Bàn phím custom prebuilt, plate FR4 và foam tiêu âm cho âm gõ chắc tay.",
-    "price": 4199.99,
-    "offerPrice": 3899.99,
+    "price": 8990000,
+    "offerPrice": 8290000,
     "image": [
       products_6
     ],
@@ -203,8 +203,8 @@ export const productsDummyData = [
     "userId": "user_2sZFHS1UIIysJyDVzCpQhUhTIhw",
     "name": "AirType Low 84",
     "description": "Bàn phím low-profile mỏng nhẹ, phản hồi nhanh, phù hợp setup tối giản.",
-    "price": 2799.99,
-    "offerPrice": 2499.99,
+    "price": 6490000,
+    "offerPrice": 5990000,
     "image": [
       products_7
     ],
@@ -217,8 +217,8 @@ export const productsDummyData = [
     "userId": "user_2sZFHS1UIIysJyDVzCpQhUhTIhw",
     "name": "MiniCore 65",
     "description": "Bàn phím 65% nhỏ gọn, keycap Cherry profile, gõ êm và chính xác.",
-    "price": 349.99,
-    "offerPrice": 299.99,
+    "price": 1490000,
+    "offerPrice": 1190000,
     "image": [
       products_8
     ],
@@ -231,8 +231,8 @@ export const productsDummyData = [
     "userId": "user_2sZFHS1UIIysJyDVzCpQhUhTIhw",
     "name": "Stealth FPS 80",
     "description": "Bàn phím cơ silent switch, anti-ghosting đầy đủ, tối ưu cho game FPS.",
-    "price": 1699.99,
-    "offerPrice": 1499.99,
+    "price": 4290000,
+    "offerPrice": 3790000,
     "image": [
       products_9
     ],
@@ -245,8 +245,8 @@ export const productsDummyData = [
     "userId": "user_2sZFHS1UIIysJyDVzCpQhUhTIhw",
     "name": "Titan RGB Max",
     "description": "Bàn phím premium RGB, build nhôm CNC chắc chắn, phù hợp setup cao cấp.",
-    "price": 2199.99,
-    "offerPrice": 1999.99,
+    "price": 5990000,
+    "offerPrice": 5490000,
     "image": [
       products_10
     ],
@@ -278,8 +278,8 @@ export const orderDummyData = [
           "userId": "user_2sZFHS1UIIysJyDVzCpQhUhTIhw",
           "name": "Aurora K68",
           "description": "Bàn phím cơ gaming full-size, LED RGB và keycap PBT bền đẹp.",
-          "price": 499.99,
-          "offerPrice": 399.99,
+          "price": 2290000,
+          "offerPrice": 1790000,
           "image": [
             products_1
           ],
@@ -291,7 +291,7 @@ export const orderDummyData = [
         "_id": "67b30111b3db72db5cc77c02"
       }
     ],
-    "amount": 799.98,
+    "amount": 3580000,
     "address": {
       "_id": "67b30111b3db72db5cc77c03",
       "userId": "user_2sZFHS1UIIysJyDVzCpQhUhTIhw",
@@ -317,8 +317,8 @@ export const orderDummyData = [
           "userId": "user_2sZFHS1UIIysJyDVzCpQhUhTIhw",
           "name": "TriMode K87",
           "description": "Bàn phím cơ Bluetooth 3 chế độ, pin lâu, dùng linh hoạt cho nhiều thiết bị.",
-          "price": 429.99,
-          "offerPrice": 329.99,
+          "price": 3190000,
+          "offerPrice": 2790000,
           "image": [
             products_5
           ],
@@ -330,7 +330,7 @@ export const orderDummyData = [
         "_id": "67b30122b3db72db5cc77c05"
       }
     ],
-    "amount": 329.99,
+    "amount": 2790000,
     "address": {
       "_id": "67b30122b3db72db5cc77c06",
       "userId": "user_2sZFHS1UIIysJyDVzCpQhUhTIhw",
@@ -356,8 +356,8 @@ export const orderDummyData = [
           "userId": "user_2sZFHS1UIIysJyDVzCpQhUhTIhw",
           "name": "Stealth FPS 80",
           "description": "Bàn phím cơ silent switch, anti-ghosting đầy đủ, tối ưu cho game FPS.",
-          "price": 1699.99,
-          "offerPrice": 1499.99,
+          "price": 4290000,
+          "offerPrice": 3790000,
           "image": [
             products_9
           ],
@@ -369,7 +369,7 @@ export const orderDummyData = [
         "_id": "67b30133b3db72db5cc77c08"
       }
     ],
-    "amount": 1499.99,
+    "amount": 3790000,
     "address": {
       "_id": "67b30133b3db72db5cc77c09",
       "userId": "user_2sZFHS1UIIysJyDVzCpQhUhTIhw",

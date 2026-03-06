@@ -1,6 +1,7 @@
 import { addressDummyData } from "@/assets/assets";
 import { useAppContext } from "@/context/AppContext";
 import React, { useEffect, useState } from "react";
+import { formatVnd } from "@/lib/price";
 
 const OrderSummary = () => {
 
@@ -98,7 +99,7 @@ const OrderSummary = () => {
         <div className="space-y-4">
           <div className="flex justify-between text-base font-medium">
             <p className="uppercase text-gray-600">Sản phẩm {getCartCount()}</p>
-            <p className="text-gray-800">{currency}{getCartAmount()}</p>
+            <p className="text-gray-800">{formatVnd(getCartAmount())} {currency}</p>
           </div>
           <div className="flex justify-between">
             <p className="text-gray-600">Phí vận chuyển</p>
@@ -106,11 +107,11 @@ const OrderSummary = () => {
           </div>
           <div className="flex justify-between">
             <p className="text-gray-600">Thuế (2%)</p>
-            <p className="font-medium text-gray-800">{currency}{Math.floor(getCartAmount() * 0.02)}</p>
+            <p className="font-medium text-gray-800">{formatVnd(Math.floor(getCartAmount() * 0.02))} {currency}</p>
           </div>
           <div className="flex justify-between text-lg md:text-xl font-medium border-t pt-3">
             <p>Tổng cộng</p>
-            <p>{currency}{getCartAmount() + Math.floor(getCartAmount() * 0.02)}</p>
+            <p>{formatVnd(getCartAmount() + Math.floor(getCartAmount() * 0.02))} {currency}</p>
           </div>
         </div>
       </div>

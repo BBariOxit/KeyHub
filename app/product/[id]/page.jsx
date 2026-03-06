@@ -9,6 +9,7 @@ import { useParams } from "next/navigation";
 import Loading from "@/components/Loading";
 import { useAppContext } from "@/context/AppContext";
 import React from "react";
+import { formatVnd } from "@/lib/price";
 
 const Product = () => {
 
@@ -85,9 +86,9 @@ const Product = () => {
                         {productData.description}
                     </p>
                     <p className="text-3xl font-medium mt-6">
-                        ${productData.offerPrice}
+                        {formatVnd(productData.offerPrice)} VND
                         <span className="text-base font-normal text-gray-800/60 line-through ml-2">
-                            ${productData.price}
+                            {formatVnd(productData.price)} VND
                         </span>
                     </p>
                     <hr className="bg-gray-600 my-6" />
