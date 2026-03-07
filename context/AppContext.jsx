@@ -71,7 +71,7 @@ export const AppContextProvider = (props) => {
             cartData[itemId] = 1;
         }
         setCartItems(cartData);
-
+        toast.success('Sản phẩm đã được thêm vào giỏ hàng')
     }
 
     const updateCartQuantity = async (itemId, quantity) => {
