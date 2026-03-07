@@ -61,29 +61,39 @@ export const AppContextProvider = (props) => {
         }
     }
 
-    const addToCart = async (itemId) => {
+    const syncCartWithServer = async (cartData, oldata) => {
+        if (!user) return
+        try {
+            const token = await getToken()
+            await axios.post('/api/cart/update', { cartData }, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+        } catch (error) {
+            toast.error("Không thể đồng bộ giỏ hàng: " + error.message)
+            setCartItems(oldata)
+        }
+    }
 
+    const addToCart = async (itemId) => {
+        const oldCartItems = structuredClone(cartItems)
         let cartData = structuredClone(cartItems);
-        if (cartData[itemId]) {
-            cartData[itemId] += 1;
-        }
-        else {
-            cartData[itemId] = 1;
-        }
-        setCartItems(cartData);
+        cartData[itemId] = (cartData[itemId] || 0) + 1
+        setCartItems(cartData)
         toast.success('Sản phẩm đã được thêm vào giỏ hàng')
+        await syncCartWithServer(cartData, oldCartItems)
     }
 
     const updateCartQuantity = async (itemId, quantity) => {
-
-        let cartData = structuredClone(cartItems);
-        if (quantity === 0) {
-            delete cartData[itemId];
+        const oldCartItems = structuredClone(cartItems)
+        let cartData = structuredClone(cartItems)
+        if (quantity <= 0) {
+            delete cartData[itemId]
         } else {
-            cartData[itemId] = quantity;
+            cartData[itemId] = quantity
         }
         setCartItems(cartData)
-
+        // toast.success('Giỏ hàng đã được cập nhật')
+        await syncCartWithServer(cartData, oldCartItems)
     }
 
     const getCartCount = () => {
