@@ -5,6 +5,8 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import debounce from 'lodash/debounce';
+import { useCallback } from 'react';
 
 export const AppContext = createContext();
 
@@ -61,29 +63,47 @@ export const AppContextProvider = (props) => {
         }
     }
 
+    const debouncedSyncCart = useCallback(
+        // sử dụng debounce tránh sapm click
+        debounce(async (cartData, oldData) => {
+            try {
+                const token = await getToken()
+                    if (!token) return
+                    await axios.post('/api/cart/update', { cartData }, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                console.log("Đã đồng bộ server xong!")
+            } catch (error) {
+                toast.error("Lỗi đồng bộ: " + error.message)
+                setCartItems(oldData)
+            }
+        }, 500),[]
+    )
+
     const addToCart = async (itemId) => {
-
+        const oldCartItems = structuredClone(cartItems)
         let cartData = structuredClone(cartItems);
-        if (cartData[itemId]) {
-            cartData[itemId] += 1;
+        cartData[itemId] = (cartData[itemId] || 0) + 1
+        setCartItems(cartData)
+        toast.success('Sản phẩm đã được thêm vào giỏ hàng')
+        if (user) {
+            debouncedSyncCart(cartData, oldCartItems)
         }
-        else {
-            cartData[itemId] = 1;
-        }
-        setCartItems(cartData);
-
     }
 
     const updateCartQuantity = async (itemId, quantity) => {
-
-        let cartData = structuredClone(cartItems);
-        if (quantity === 0) {
-            delete cartData[itemId];
+        const oldCartItems = structuredClone(cartItems)
+        let cartData = structuredClone(cartItems)
+        if (quantity <= 0) {
+            delete cartData[itemId]
         } else {
-            cartData[itemId] = quantity;
+            cartData[itemId] = quantity
         }
         setCartItems(cartData)
-
+        // toast.success('Giỏ hàng đã được cập nhật')
+        if (user) {
+            debouncedSyncCart(cartData, oldCartItems)
+        }
     }
 
     const getCartCount = () => {
