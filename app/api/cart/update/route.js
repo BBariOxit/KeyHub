@@ -1,5 +1,6 @@
 import connectDB from "@/config/db";
 import User from "@/models/User";
+import { clerkClient } from "@clerk/nextjs/server";
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import z from "zod";
@@ -33,11 +34,29 @@ export async function POST(req) {
 
     await connectDB()
 
-    await User.findOneAndUpdate(
-      { clerkId: userId },
-      { cartItems: cleanCartData },
-      { upsert: true, new: true }
-    )
+    // User model đang dùng _id = clerk userId, không phải clerkId.
+    let user = await User.findById(userId)
+
+    if (!user) {
+      const client = await clerkClient()
+      const clerkUser = await client.users.getUser(userId)
+
+      const firstName = clerkUser.firstName || ""
+      const lastName = clerkUser.lastName || ""
+      const fullName = `${firstName} ${lastName}`.trim() || clerkUser.username || "User"
+      const email = clerkUser.emailAddresses?.[0]?.emailAddress || ""
+
+      user = await User.create({
+        _id: userId,
+        name: fullName,
+        email,
+        imageUrl: clerkUser.imageUrl || "",
+        cartItems: {}
+      })
+    }
+
+    user.cartItems = cleanCartData
+    await user.save()
 
     return NextResponse.json({ success: true })
   } catch (error) {
