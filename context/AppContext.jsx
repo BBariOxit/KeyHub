@@ -100,7 +100,7 @@ export const AppContextProvider = (props) => {
             cartData[itemId] = quantity
         }
         setCartItems(cartData)
-        // toast.success('Giỏ hàng đã được cập nhật')
+        toast.success('Giỏ hàng đã được cập nhật')
         if (user) {
             debouncedSyncCart(cartData, oldCartItems)
         }
