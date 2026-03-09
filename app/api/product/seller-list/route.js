@@ -7,7 +7,7 @@ import { NextResponse } from "next/server";
 export async function GET(req) {
   try {
     const { userId } = getAuth(req)
-    const isSeller = authSeller(userId)
+    const isSeller = await authSeller(userId)
     if (!isSeller) {
       return NextResponse.json({ success: false, message: 'not authorized' })
     }
