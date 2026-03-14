@@ -2,7 +2,6 @@ import { Inngest } from "inngest";
 import connectDB from "./db";
 import User from "@/models/User";
 import Order from "@/models/Order";
-import { success } from "zod";
 
 // Create a client to send and receive events
 export const inngest = new Inngest({ id: "keyhub" });
@@ -89,19 +88,25 @@ export const createUserOrder = inngest.createFunction(
   {
     event: 'order/created'
   },
-  async ({events}) => {
+  async ({events, step}) => {
     const orders = events.map((event) => {
       return {
         userId: event.data.userId,
-        items: event.data.items,
-        amount: event.data.amount,
+        items: event.data.items.map(item => ({
+          product: item.product,
+          quantity: Number(item.quantity)
+        })),
+        amount: Number(event.data.amount),
         address: event.data.address,
-        date: event.data.date 
+        date: event.data.date || Date.now()
       }
     })
 
-    await connectDB()
-    await Order.insertMany(orders)
+    await step.run('save-orders-to-db', async () => {
+      await connectDB()
+      await Order.insertMany(orders)
+      // Không cần return result ở đây nếu chỉ cần đếm số lượng
+    })
     
     return { success: true, processed: orders.length }
   }
