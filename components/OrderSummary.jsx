@@ -1,18 +1,19 @@
 import { useAppContext } from "@/context/AppContext";
 import { formatVnd } from "@/lib/price";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import toast from "react-hot-toast";
 
 const OrderSummary = () => {
 
   const { currency, router, getCartCount, getCartAmount, getToken, user, cartItems, setCartItems } = useAppContext()
-  const [selectedAddress, setSelectedAddress] = useState(null);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState(null)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
 
-  const [userAddresses, setUserAddresses] = useState([]);
+  const [userAddresses, setUserAddresses] = useState([])
 
-  const fetchUserAddresses = async () => {
+  const fetchUserAddresses = useCallback(async () => {
     try {
       const token = await getToken()
       const { data } = await axios.get('/api/user/get-address', {headers:{Authorization: `Bearer ${token}`}})
@@ -29,7 +30,7 @@ const OrderSummary = () => {
     } catch (error) {
         toast.error(error.response?.data?.message || error.message)
     }
-  }
+  }, [getToken])
 
   const handleAddressSelect = (address) => {
     setSelectedAddress(address);
@@ -37,7 +38,45 @@ const OrderSummary = () => {
   };
 
   const createOrder = async () => {
+    if (!selectedAddress) {
+      return toast.error('Vui lòng chọn địa chỉ giao hàng')
+    }
 
+    let cartItemsArray = Object.keys(cartItems).map((key) => ({product:key, quantity: cartItems[key]}))
+      cartItemsArray = cartItemsArray.filter(item => item.quantity > 0)
+
+    if (cartItemsArray.length === 0) {
+      return toast.error('Giỏ hàng trống!')
+    }
+
+    try {
+      setLoading(true)
+      const token = await getToken()
+      if (!token) {
+        return toast.error("Vui lòng đăng nhập để đặt hàng")
+      }
+
+      const { data } = await axios.post('/api/order/create', {
+        address: selectedAddress._id,
+        items: cartItemsArray
+      }, {
+        headers: {Authorization: `Bearer ${token}`}
+      })
+
+      if (data.success) {
+        toast.success(data.message || 'Đặt hàng thành công!')
+        setCartItems({})
+        router.push('/order-placed')
+      } else {
+        toast.error(data.message || 'Có lỗi xảy ra khi đặt hàng')
+      }
+
+    } catch (error) {
+      const msg = error.response?.data?.message || error.message || 'Lỗi kết nối server';
+      toast.error(msg)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
