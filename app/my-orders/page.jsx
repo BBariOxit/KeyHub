@@ -51,7 +51,7 @@ const MyOrders = () => {
                     {loading ? <Loading /> : (<div className="mt-6 space-y-4 text-sm">
                         {orders.map((order, index) => (
                             <div key={index} className="grid grid-cols-1 items-start gap-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5 lg:grid-cols-12 lg:items-center lg:gap-6">
-                                <div className="flex min-w-0 gap-4 lg:col-span-4">
+                                <div className="flex min-w-0 items-center gap-4 lg:col-span-4">
                                     <Image
                                         className="h-14 w-14 shrink-0 object-contain"
                                         src={assets.box_icon}
