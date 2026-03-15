@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from "react";
-import { assets, orderDummyData } from "@/assets/assets";
+import { assets } from "@/assets/assets";
 import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
 import Footer from "@/components/Footer";
@@ -45,27 +45,31 @@ const MyOrders = () => {
     return (
         <>
             <Navbar />
-            <div className="flex flex-col justify-between px-6 md:px-16 lg:px-32 py-6 min-h-screen">
-                <div className="space-y-5">
-                    <h2 className="text-lg font-medium mt-6">My Orders</h2>
-                    {loading ? <Loading /> : (<div className="max-w-5xl border-t border-gray-300 text-sm">
+            <div className="min-h-screen bg-[#fafafa] px-4 py-8 sm:px-6 lg:px-8">
+                <div className="mx-auto w-full max-w-6xl">
+                    <h2 className="mt-4 text-2xl font-semibold text-gray-800 sm:mt-6">Đơn hàng của tôi</h2>
+                    {loading ? <Loading /> : (<div className="mt-6 space-y-4 text-sm">
                         {orders.map((order, index) => (
-                            <div key={index} className="flex flex-col md:flex-row gap-5 justify-between p-5 border-b border-gray-300">
-                                <div className="flex-1 flex gap-5 max-w-80">
+                            <div key={index} className="grid grid-cols-1 items-start gap-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5 lg:grid-cols-12 lg:items-center lg:gap-6">
+                                <div className="flex min-w-0 gap-4 lg:col-span-4">
                                     <Image
-                                        className="max-w-16 max-h-16 object-cover"
+                                        className="h-14 w-14 shrink-0 object-contain"
                                         src={assets.box_icon}
                                         alt="box_icon"
                                     />
-                                    <p className="flex flex-col gap-3">
-                                        <span className="font-medium text-base">
-                                            {order.items.map((item) => item.product.name + ` x ${item.quantity}`).join(", ")}
-                                        </span>
-                                        <span>Items : {order.items.length}</span>
-                                    </p>
+                                    <div className="flex min-w-0 flex-col gap-2 text-gray-700">
+                                        <div className="space-y-1 text-base font-semibold text-gray-800">
+                                            {order.items.map((item, itemIndex) => (
+                                                <p key={itemIndex} className="leading-7">
+                                                    {item.product.name} x {item.quantity}
+                                                </p>
+                                            ))}
+                                        </div>
+                                        <span>Sản phẩm: {order.items.length}</span>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p>
+                                <div className="lg:col-span-3">
+                                    <p className="leading-6 text-gray-700">
                                         <span className="font-medium">{order.address.fullName}</span>
                                         <br />
                                         <span >{order.address.area}</span>
@@ -75,12 +79,12 @@ const MyOrders = () => {
                                         <span>{order.address.phoneNumber}</span>
                                     </p>
                                 </div>
-                                <p className="font-medium my-auto">{formatVnd(order.amount)} {currency}</p>
-                                <div>
-                                    <p className="flex flex-col">
-                                        <span>Method : COD</span>
-                                        <span>Date : {new Date(order.date).toLocaleDateString()}</span>
-                                        <span>Payment : Pending</span>
+                                <p className="text-base font-semibold text-gray-900 lg:col-span-2 lg:text-center">{formatVnd(order.amount)} {currency}</p>
+                                <div className="lg:col-span-3 lg:text-right">
+                                    <p className="flex flex-col leading-6 text-gray-700">
+                                        <span>Phương thức: COD</span>
+                                        <span>Ngày đặt: {new Date(order.date).toLocaleDateString()}</span>
+                                        <span>Thanh toán: Chờ xử lý</span>
                                     </p>
                                 </div>
                             </div>

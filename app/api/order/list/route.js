@@ -4,7 +4,6 @@ import Order from "@/models/Order";
 import Product from "@/models/Product";
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { success } from "zod";
 
 
 export async function GET(req) {
@@ -17,8 +16,8 @@ export async function GET(req) {
     }
 
     const orders = await Order.find({ userId })
-      .populate('address')
-      .populate('items.product')
+      .populate({ path: 'address', model: Address })
+      .populate({ path: 'items.product', model: Product })
       .sort({ createdAt: -1 })
 
     return NextResponse.json({ success: true, count: orders.length, orders })
