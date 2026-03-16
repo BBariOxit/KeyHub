@@ -1,6 +1,6 @@
 'use client'
 import React, { useEffect, useState } from "react";
-import { assets, productsDummyData } from "@/assets/assets";
+import { assets } from "@/assets/assets";
 import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
 import Footer from "@/components/seller/Footer";
@@ -17,8 +17,6 @@ const ProductList = () => {
   const [loading, setLoading] = useState(true)
 
   const fetchSellerProduct = async () => {
-    // setProducts(productsDummyData)
-    // setLoading(false)
     try {
       const token = await getToken()
       const { data } = await axios.get('/api/product/seller-list', { headers: { Authorization: `Bearer ${token}` }})
