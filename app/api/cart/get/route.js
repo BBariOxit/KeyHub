@@ -7,18 +7,25 @@ export async function GET(req) {
   try {
     const { userId } = getAuth(req)
     if (!userId) {
-      return NextResponse.json({ success: false, message: "Bạn cần đăng nhập để xem giỏ hàng" }, { status: 401 });
+      return NextResponse.json(
+        { success: false, message: "Vui lòng đăng nhập để xem giỏ hàng." },
+        { status: 401 }
+      )
     }
 
     await connectDB()
-    const user = await User.findById(userId).select("cartItems");
+    const user = await User.findById(userId).select("cartItems").lean()
 
     if (!user) {
-      return NextResponse.json({ success: true, cartItems: {} });
+      return NextResponse.json({ success: true, cartItems: {} })
     }
 
     return NextResponse.json({ success: true, cartItems: user.cartItems || {} })
   } catch (error) {
-    return NextResponse.json({ success: false, message: error.message }, { status: 500 })
+    console.error("Lỗi get cart:", error)
+    return NextResponse.json(
+      { success: false, message: "Đã xảy ra lỗi hệ thống, vui lòng thử lại sau." }, 
+      { status: 500 }
+    )
   }
 }
