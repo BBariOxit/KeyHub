@@ -1,6 +1,6 @@
 import connectDB from "@/config/db";
 import User from "@/models/User";
-import { auth, clerkClient } from "@clerk/nextjs/server";
+import { clerkClient, getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import z from "zod";
 
@@ -8,7 +8,7 @@ const cartSchema = z.record(z.string(), z.number().int().positive())
 
 export async function POST(req) {
   try {
-    const { userId } = auth()
+    const { userId } = getAuth(req)
     
     if (!userId) {
       return NextResponse.json(

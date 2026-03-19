@@ -1,23 +1,23 @@
 import connectDB from "@/config/db";
 import User from "@/models/User";
-import { auth } from "@clerk/nextjs/server";
+import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(req) {
   try {
-    const { userId } = auth()
+    const { userId } = getAuth(req)
     if (!userId) {
       return NextResponse.json(
         { success: false, message: "Vui lòng đăng nhập để xem giỏ hàng." },
         { status: 401 }
-      );
+      )
     }
 
     await connectDB()
     const user = await User.findById(userId).select("cartItems").lean()
 
     if (!user) {
-      return NextResponse.json({ success: true, cartItems: {} });
+      return NextResponse.json({ success: true, cartItems: {} })
     }
 
     return NextResponse.json({ success: true, cartItems: user.cartItems || {} })
