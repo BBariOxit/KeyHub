@@ -33,7 +33,7 @@ const Navbar = () => {
           Liên hệ
         </Link>
 
-        {isSeller && <button onClick={() => router.push('/seller')} className="text-xs border px-4 py-1.5 rounded-full">Kênh người bán</button>}
+        {user && isSeller && <button onClick={() => router.push('/seller')} className="text-xs border px-4 py-1.5 rounded-full">Kênh người bán</button>}
 
       </div>
 
@@ -59,7 +59,7 @@ const Navbar = () => {
       </ul>
 
       <div className="flex items-center md:hidden gap-3">
-        {isSeller && <button onClick={() => router.push('/seller')} className="text-xs border px-4 py-1.5 rounded-full">Kênh người bán</button>}
+        {user && isSeller && <button onClick={() => router.push('/seller')} className="text-xs border px-4 py-1.5 rounded-full">Kênh người bán</button>}
         { 
           user
             ? <>

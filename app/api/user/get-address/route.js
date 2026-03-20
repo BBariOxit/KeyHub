@@ -16,9 +16,10 @@ export async function GET(req) {
     const addresses = await Address.find({userId}).sort({ createdAt: -1 })
     return NextResponse.json({success: true, addresses})
   } catch (error) {
+    console.error('Get address error:', error)
     return NextResponse.json({
       success: false,
-      message: error.message || 'Internal Server Error'
+      message: 'Không thể tải danh sách địa chỉ.'
     }, { status: 500 })
   }
 }

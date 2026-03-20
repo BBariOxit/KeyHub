@@ -1,5 +1,5 @@
 'use client'
-import { useAuth, useUser } from "@clerk/nextjs";
+import { useAuth, useClerk, useUser } from "@clerk/nextjs";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useState } from "react";
@@ -19,6 +19,7 @@ export const AppContextProvider = (props) => {
     const router = useRouter()
 
     const { user } = useUser()
+    const { openSignIn } = useClerk()
     const { getToken } = useAuth()
 
     const [products, setProducts] = useState([])
@@ -41,9 +42,7 @@ export const AppContextProvider = (props) => {
 
     const fetchUserData = async () => {
         try {
-            if (user?.publicMetadata?.role === 'seller' ) {
-                setIsSeller(true)
-            }
+            setIsSeller(user?.publicMetadata?.role === 'seller')
 
             const token = await getToken()
             if (!token) {
@@ -80,14 +79,18 @@ export const AppContextProvider = (props) => {
     )
 
     const addToCart = async (itemId) => {
+        if (!user) {
+            await openSignIn()
+            return false
+        }
+
         const oldCartItems = structuredClone(cartItems)
         let cartData = structuredClone(cartItems);
         cartData[itemId] = (cartData[itemId] || 0) + 1
         setCartItems(cartData)
         toast.success('Sản phẩm đã được thêm vào giỏ hàng')
-        if (user) {
-            debouncedSyncCart(cartData, oldCartItems)
-        }
+        debouncedSyncCart(cartData, oldCartItems)
+        return true
     }
 
     const updateCartQuantity = async (itemId, quantity) => {
@@ -133,7 +136,12 @@ export const AppContextProvider = (props) => {
     useEffect(() => {
         if (user) {
             fetchUserData()
+            return
         }
+
+        setIsSeller(false)
+        setUserData(false)
+        setCartItems({})
     }, [user])
 
     const value = {

@@ -37,9 +37,10 @@ export async function POST(req) {
     }, { status: 201 })
 
   } catch (error) {
+    console.error('Add address error:', error)
     return NextResponse.json({ 
       success: false,
-      message: error.message || 'Đã có lỗi xảy ra!'
+      message: 'Không thể thêm địa chỉ lúc này.'
     }, { status: 500 })
   }
 }

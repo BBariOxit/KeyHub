@@ -10,6 +10,7 @@ export async function GET(req) {
     const products = await Product.find({})
     return NextResponse.json({ success: true, products }) 
   } catch (error) {
-    return NextResponse.json({ success: false, message: error.message })
+    console.error('Product list error:', error)
+    return NextResponse.json({ success: false, message: 'Không thể tải danh sách sản phẩm.' }, { status: 500 })
   }
 }
