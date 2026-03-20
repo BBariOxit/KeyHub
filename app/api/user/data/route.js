@@ -32,6 +32,7 @@ export async function GET(req) {
     }
     return NextResponse.json({ success: true, user })
   } catch (error) {
-      return NextResponse.json({ success: false, message: error.message })
+      console.error('User data error:', error)
+      return NextResponse.json({ success: false, message: 'Không thể tải thông tin người dùng.' }, { status: 500 })
   }
 }

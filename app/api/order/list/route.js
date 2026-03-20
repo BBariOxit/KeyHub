@@ -22,6 +22,7 @@ export async function GET(req) {
 
     return NextResponse.json({ success: true, count: orders.length, orders })
   } catch (error) {
-    return NextResponse.json({ success: false, message: error.message }, { status: 500 })
+    console.error('Order list error:', error)
+    return NextResponse.json({ success: false, message: 'Không thể tải danh sách đơn hàng.' }, { status: 500 })
   }
 }

@@ -117,7 +117,12 @@ const Product = () => {
                         <button onClick={() => addToCart(productData._id)} className="w-full py-3.5 bg-gray-100 text-gray-800/80 hover:bg-gray-200 transition">
                             Thêm vào giỏ
                         </button>
-                        <button onClick={() => { addToCart(productData._id); router.push('/cart') }} className="w-full py-3.5 bg-orange-500 text-white hover:bg-orange-600 transition">
+                        <button onClick={async () => {
+                            const added = await addToCart(productData._id)
+                            if (added) {
+                                router.push('/cart')
+                            }
+                        }} className="w-full py-3.5 bg-orange-500 text-white hover:bg-orange-600 transition">
                             Mua ngay
                         </button>
                     </div>

@@ -7,9 +7,13 @@ import { NextResponse } from "next/server";
 export async function GET(req) {
   try {
     const { userId } = getAuth(req)
+    if (!userId) {
+      return NextResponse.json({ success: false, message: 'Vui lòng đăng nhập để thực hiện thao tác này.' }, { status: 401 })
+    }
+
     const isSeller = await authSeller(userId)
     if (!isSeller) {
-      return NextResponse.json({ success: false, message: 'not authorized' })
+      return NextResponse.json({ success: false, message: 'Bạn không có quyền thực hiện thao tác này.' }, { status: 403 })
     }
 
     await connectDB()
@@ -17,6 +21,7 @@ export async function GET(req) {
     const products = await Product.find({})
     return NextResponse.json({ success: true, products }) 
   } catch (error) {
-    return NextResponse.json({ success: false, message: error.message })
+    console.error('Seller product list error:', error)
+    return NextResponse.json({ success: false, message: 'Không thể tải danh sách sản phẩm của shop.' }, { status: 500 })
   }
 }
