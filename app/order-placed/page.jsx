@@ -9,10 +9,12 @@ const OrderPlaced = () => {
   const { router } = useAppContext()
 
   useEffect(() => {
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       router.push('/my-orders')
     }, 5000)
-  }, [])
+
+    return () => clearTimeout(timer)
+  }, [router])
 
   return (
     <div className='h-screen flex flex-col justify-center items-center gap-5'>

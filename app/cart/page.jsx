@@ -1,5 +1,5 @@
 'use client'
-import React from "react";
+import React, { useMemo } from "react";
 import { assets } from "@/assets/assets";
 import OrderSummary from "@/components/OrderSummary";
 import Image from "next/image";
@@ -10,6 +10,19 @@ import { formatVnd } from "@/lib/price";
 const Cart = () => {
 
   const { products, router, cartItems, addToCart, updateCartQuantity, getCartCount } = useAppContext();
+  const productMap = useMemo(() => {
+    return new Map(products.map((product) => [product._id, product]));
+  }, [products]);
+
+  const cartProductRows = useMemo(() => {
+    return Object.keys(cartItems)
+      .map((itemId) => {
+        const quantity = cartItems[itemId];
+        const product = productMap.get(itemId);
+        return { itemId, product, quantity };
+      })
+      .filter(({ product, quantity }) => product && quantity > 0);
+  }, [cartItems, productMap]);
 
   return (
     <>
@@ -41,11 +54,7 @@ const Cart = () => {
                 </tr>
               </thead>
               <tbody>
-                {Object.keys(cartItems).map((itemId) => {
-                  const product = products.find(product => product._id === itemId);
-
-                  if (!product || cartItems[itemId] <= 0) return null;
-
+                {cartProductRows.map(({ itemId, product, quantity }) => {
                   return (
                     <tr key={itemId}>
                       <td className="flex items-center gap-4 py-4 md:px-4 px-1">
@@ -79,14 +88,14 @@ const Cart = () => {
                       <td className="py-4 md:px-4 px-1 text-gray-600">{formatVnd(product.offerPrice)} VND</td>
                       <td className="py-4 md:px-4 px-1">
                         <div className="flex items-center md:gap-2 gap-1">
-                          <button onClick={() => updateCartQuantity(product._id, cartItems[itemId] - 1)}>
+                          <button onClick={() => updateCartQuantity(product._id, quantity - 1)}>
                             <Image
                               src={assets.decrease_arrow}
                               alt="decrease_arrow"
                               className="w-4 h-4"
                             />
                           </button>
-                          <input onChange={e => updateCartQuantity(product._id, Number(e.target.value))} type="number" value={cartItems[itemId]} className="w-8 border text-center appearance-none"></input>
+                          <input onChange={e => updateCartQuantity(product._id, Number(e.target.value))} type="number" value={quantity} className="w-8 border text-center appearance-none"></input>
                           <button onClick={() => addToCart(product._id)}>
                             <Image
                               src={assets.increase_arrow}
@@ -96,7 +105,7 @@ const Cart = () => {
                           </button>
                         </div>
                       </td>
-                      <td className="py-4 md:px-4 px-1 text-gray-600">{formatVnd(product.offerPrice * cartItems[itemId])} VND</td>
+                      <td className="py-4 md:px-4 px-1 text-gray-600">{formatVnd(product.offerPrice * quantity)} VND</td>
                     </tr>
                   );
                 })}

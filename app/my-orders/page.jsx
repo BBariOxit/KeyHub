@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { assets } from "@/assets/assets";
 import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
@@ -17,7 +17,7 @@ const MyOrders = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const fetchOrders = async () => {
+    const fetchOrders = useCallback(async () => {
         setLoading(true)
         try {
             const token = await getToken()
@@ -34,13 +34,13 @@ const MyOrders = () => {
         } finally {
             setLoading(false)
         }
-    }
+    }, [getToken])
 
     useEffect(() => {
         if (user) {
             fetchOrders()
         }
-    }, [user])
+    }, [user, fetchOrders])
 
     return (
         <>
@@ -50,7 +50,7 @@ const MyOrders = () => {
                     <h2 className="mt-4 text-2xl font-semibold text-gray-800 sm:mt-6">Đơn hàng của tôi</h2>
                     {loading ? <Loading /> : (<div className="mt-6 space-y-4 text-sm">
                         {orders.map((order, index) => (
-                            <div key={index} className="grid grid-cols-1 items-start gap-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5 lg:grid-cols-12 lg:items-center lg:gap-6">
+                            <div key={order._id || index} className="grid grid-cols-1 items-start gap-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5 lg:grid-cols-12 lg:items-center lg:gap-6">
                                 <div className="flex min-w-0 items-center gap-4 lg:col-span-4">
                                     <Image
                                         className="h-14 w-14 shrink-0 object-contain"
@@ -60,7 +60,7 @@ const MyOrders = () => {
                                     <div className="flex min-w-0 flex-col gap-2 text-gray-700">
                                         <div className="space-y-1 text-base font-semibold text-gray-800">
                                             {order.items.map((item, itemIndex) => (
-                                                <p key={itemIndex} className="leading-7">
+                                                <p key={item.product?._id || `${itemIndex}-${item.quantity}`} className="leading-7">
                                                     {item.product.name} x {item.quantity}
                                                 </p>
                                             ))}

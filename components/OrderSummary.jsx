@@ -1,7 +1,7 @@
 import { useAppContext } from "@/context/AppContext";
 import { formatVnd } from "@/lib/price";
 import axios from "axios";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import toast from "react-hot-toast";
 
 const OrderSummary = () => {
@@ -12,6 +12,10 @@ const OrderSummary = () => {
   const [loading, setLoading] = useState(false)
 
   const [userAddresses, setUserAddresses] = useState([])
+  const subtotal = useMemo(() => getCartAmount(), [getCartAmount])
+  const itemsCount = useMemo(() => getCartCount(), [getCartCount])
+  const taxAmount = useMemo(() => Math.floor(subtotal * 0.02), [subtotal])
+  const totalAmount = useMemo(() => subtotal + taxAmount, [subtotal, taxAmount])
 
   const fetchUserAddresses = useCallback(async () => {
     try {
@@ -38,6 +42,10 @@ const OrderSummary = () => {
   };
 
   const createOrder = async () => {
+    if (loading) {
+      return
+    }
+
     if (!selectedAddress) {
       return toast.error('Vui lòng chọn địa chỉ giao hàng')
     }
@@ -83,7 +91,7 @@ const OrderSummary = () => {
     if (user) {
       fetchUserAddresses()
     }
-  }, [user])
+  }, [user, fetchUserAddresses])
 
   return (
     <div className="w-full md:w-96 bg-gray-500/5 p-5">
@@ -99,7 +107,7 @@ const OrderSummary = () => {
           <div className="relative inline-block w-full text-sm border">
             <button
               className="peer w-full text-left px-4 pr-2 py-2 bg-white text-gray-700 focus:outline-none"
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              onClick={() => setIsDropdownOpen((prev) => !prev)}
             >
               <span>
                 {selectedAddress
@@ -117,7 +125,7 @@ const OrderSummary = () => {
               <ul className="absolute w-full bg-white border shadow-md mt-1 z-10 py-1.5">
                 {userAddresses.map((address, index) => (
                   <li
-                    key={index}
+                    key={address._id || `${address.phoneNumber || "phone"}-${index}`}
                     className="px-4 py-2 hover:bg-gray-500/10 cursor-pointer"
                     onClick={() => handleAddressSelect(address)}
                   >
@@ -155,8 +163,8 @@ const OrderSummary = () => {
 
         <div className="space-y-4">
           <div className="flex justify-between text-base font-medium">
-            <p className="uppercase text-gray-600">Sản phẩm {getCartCount()}</p>
-            <p className="text-gray-800">{formatVnd(getCartAmount())} {currency}</p>
+            <p className="uppercase text-gray-600">Sản phẩm {itemsCount}</p>
+            <p className="text-gray-800">{formatVnd(subtotal)} {currency}</p>
           </div>
           <div className="flex justify-between">
             <p className="text-gray-600">Phí vận chuyển</p>
@@ -164,17 +172,21 @@ const OrderSummary = () => {
           </div>
           <div className="flex justify-between">
             <p className="text-gray-600">Thuế (2%)</p>
-            <p className="font-medium text-gray-800">{formatVnd(Math.floor(getCartAmount() * 0.02))} {currency}</p>
+            <p className="font-medium text-gray-800">{formatVnd(taxAmount)} {currency}</p>
           </div>
           <div className="flex justify-between text-lg md:text-xl font-medium border-t pt-3">
             <p>Tổng cộng</p>
-            <p>{formatVnd(getCartAmount() + Math.floor(getCartAmount() * 0.02))} {currency}</p>
+            <p>{formatVnd(totalAmount)} {currency}</p>
           </div>
         </div>
       </div>
 
-      <button onClick={createOrder} className="w-full bg-orange-600 text-white py-3 mt-5 hover:bg-orange-700">
-        Đặt hàng
+      <button
+        onClick={createOrder}
+        disabled={loading}
+        className="w-full bg-orange-600 text-white py-3 mt-5 hover:bg-orange-700 disabled:opacity-60 disabled:cursor-not-allowed"
+      >
+        {loading ? "Đang xử lý..." : "Đặt hàng"}
       </button>
     </div>
   );
