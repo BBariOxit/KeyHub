@@ -2,34 +2,34 @@ import React, { useState, useEffect } from "react";
 import { assets } from "@/assets/assets";
 import Image from "next/image";
 
-const HeaderSlider = () => {
-  const sliderData = [
-    {
-      id: 1,
-      title: "Bàn phím cơ RGB - Tăng tốc mọi trận đấu",
-      offer: "Ưu đãi giới hạn giảm đến 30%",
-      buttonText1: "Mua ngay",
-      buttonText2: "Xem thêm",
-      imgSrc: assets.products_1,
-    },
-    {
-      id: 2,
-      title: "Thiết kế gọn gàng, hiệu năng ổn định cho mọi setup",
-      offer: "Số lượng có hạn",
-      buttonText1: "Mua ngay",
-      buttonText2: "Khám phá",
-      imgSrc: assets.products_7,
-    },
-    {
-      id: 3,
-      title: "Cảm giác gõ cao cấp cho game thủ và dân văn phòng",
-      offer: "Giảm thêm 10% hôm nay",
-      buttonText1: "Đặt ngay",
-      buttonText2: "Tìm hiểu",
-      imgSrc: assets.products_10,
-    },
-  ];
+const sliderData = [
+  {
+    id: 1,
+    title: "Bàn phím cơ RGB - Tăng tốc mọi trận đấu",
+    offer: "Ưu đãi giới hạn giảm đến 30%",
+    buttonText1: "Mua ngay",
+    buttonText2: "Xem thêm",
+    imgSrc: assets.products_1,
+  },
+  {
+    id: 2,
+    title: "Thiết kế gọn gàng, hiệu năng ổn định cho mọi setup",
+    offer: "Số lượng có hạn",
+    buttonText1: "Mua ngay",
+    buttonText2: "Khám phá",
+    imgSrc: assets.products_7,
+  },
+  {
+    id: 3,
+    title: "Cảm giác gõ cao cấp cho game thủ và dân văn phòng",
+    offer: "Giảm thêm 10% hôm nay",
+    buttonText1: "Đặt ngay",
+    buttonText2: "Tìm hiểu",
+    imgSrc: assets.products_10,
+  },
+];
 
+const HeaderSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
@@ -37,7 +37,7 @@ const HeaderSlider = () => {
       setCurrentSlide((prev) => (prev + 1) % sliderData.length);
     }, 3000);
     return () => clearInterval(interval);
-  }, [sliderData.length]);
+  }, []);
 
   const handleSlideChange = (index) => {
     setCurrentSlide(index);
@@ -83,9 +83,9 @@ const HeaderSlider = () => {
       </div>
 
       <div className="flex items-center justify-center gap-2 mt-8">
-        {sliderData.map((_, index) => (
+        {sliderData.map((slide, index) => (
           <div
-            key={index}
+            key={slide.id}
             onClick={() => handleSlideChange(index)}
             className={`h-2 w-2 rounded-full cursor-pointer ${
               currentSlide === index ? "bg-orange-600" : "bg-gray-500/30"

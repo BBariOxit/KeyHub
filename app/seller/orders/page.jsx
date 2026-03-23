@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { assets } from "@/assets/assets";
 import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
@@ -8,7 +8,6 @@ import Loading from "@/components/Loading";
 import { formatVnd } from "@/lib/price";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { useRef } from "react";
 
 const Orders = () => {
 
@@ -18,7 +17,7 @@ const Orders = () => {
     const [loading, setLoading] = useState(true);
     const hasFetchedRef = useRef(false);
 
-    const fetchSellerOrders = async () => {
+    const fetchSellerOrders = useCallback(async () => {
         try {
             setLoading(true)
             const token = await getToken()
@@ -39,14 +38,14 @@ const Orders = () => {
         } finally {
             setLoading(false)
         }
-    }
+    }, [getToken])
 
     useEffect(() => {
         if (user && !hasFetchedRef.current) {
             hasFetchedRef.current = true
             fetchSellerOrders()
         }
-    }, [user])
+    }, [user, fetchSellerOrders])
 
     return (
         <div className="flex-1 h-screen overflow-scroll flex flex-col justify-between text-sm">
@@ -54,7 +53,7 @@ const Orders = () => {
                 <h2 className="text-lg font-medium">Đơn hàng</h2>
                 <div className="max-w-6xl rounded-md">
                     {orders.map((order, index) => (
-                        <div key={index} className="grid grid-cols-1 md:grid-cols-[2.35fr_1.45fr_1.2fr_1.5fr] gap-5 md:gap-x-7 md:gap-y-6 p-6 border-t border-gray-300 md:items-center">
+                        <div key={order._id || index} className="grid grid-cols-1 md:grid-cols-[2.35fr_1.45fr_1.2fr_1.5fr] gap-5 md:gap-x-7 md:gap-y-6 p-6 border-t border-gray-300 md:items-center">
                             <div className="flex items-center gap-5 md:gap-6 min-w-0">
                                 <Image
                                     className="w-16 h-16 object-cover shrink-0"

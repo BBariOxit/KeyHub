@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { assets } from "@/assets/assets";
 import ProductCard from "@/components/ProductCard";
 import Navbar from "@/components/Navbar";
@@ -18,16 +18,13 @@ const Product = () => {
     const { products, router, addToCart } = useAppContext()
 
     const [mainImage, setMainImage] = useState(null);
-    const [productData, setProductData] = useState(null);
-
-    const fetchProductData = async () => {
-        const product = products.find(product => product._id === id);
-        setProductData(product);
-    }
+    const productData = useMemo(() => {
+        return products.find((product) => product._id === id) || null;
+    }, [products, id]);
 
     useEffect(() => {
-        fetchProductData();
-    }, [id, products.length])
+        setMainImage(null)
+    }, [id])
 
     return productData ? (<>
         <Navbar />
@@ -47,7 +44,7 @@ const Product = () => {
                     <div className="grid grid-cols-4 gap-4">
                         {productData.image.map((image, index) => (
                             <div
-                                key={index}
+                                key={`${image}-${index}`}
                                 onClick={() => setMainImage(image)}
                                 className="cursor-pointer rounded-lg overflow-hidden bg-gray-500/10 h-24 md:h-28 flex items-center justify-center"
                             >
@@ -134,9 +131,9 @@ const Product = () => {
                     <div className="w-28 h-0.5 bg-orange-600 mt-2"></div>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mt-6 pb-14 w-full">
-                    {products.slice(0, 5).map((product, index) => <ProductCard key={index} product={product} />)}
+                    {products.slice(0, 5).map((product) => <ProductCard key={product._id} product={product} />)}
                 </div>
-                <button className="px-8 py-2 mb-16 border rounded text-gray-500/70 hover:bg-slate-50/90 transition">
+                <button onClick={() => router.push('/all-products')} className="px-8 py-2 mb-16 border rounded text-gray-500/70 hover:bg-slate-50/90 transition">
                     Xem thêm
                 </button>
             </div>

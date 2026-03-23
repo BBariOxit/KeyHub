@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { assets } from "@/assets/assets";
 import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
@@ -17,6 +17,20 @@ const AddProduct = () => {
   const [category, setCategory] = useState('Keyboard');
   const [price, setPrice] = useState('');
   const [offerPrice, setOfferPrice] = useState('');
+
+  const previewUrls = useMemo(() => {
+    return files.map((file) => (file ? URL.createObjectURL(file) : null));
+  }, [files]);
+
+  useEffect(() => {
+    return () => {
+      previewUrls.forEach((url) => {
+        if (url) {
+          URL.revokeObjectURL(url);
+        }
+      });
+    };
+  }, [previewUrls]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -68,9 +82,8 @@ const AddProduct = () => {
                   setFiles(updatedFiles);
                 }} type="file" id={`image${index}`} hidden />
                 <Image
-                  key={index}
                   className="max-w-24 cursor-pointer"
-                  src={files[index] ? URL.createObjectURL(files[index]) : assets.upload_area}
+                  src={previewUrls[index] || assets.upload_area}
                   alt=""
                   width={100}
                   height={100}
@@ -120,7 +133,7 @@ const AddProduct = () => {
               id="category"
               className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
               onChange={(e) => setCategory(e.target.value)}
-              defaultValue={category}
+              value={category}
             >
               <option value="Keyboard">Bàn phím</option>
               <option value="Mechanical Keyboard">Bàn phím cơ</option>
