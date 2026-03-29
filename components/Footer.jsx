@@ -7,7 +7,7 @@ const Footer = () => {
     <footer className="bg-[#f0f1f2]">
       <div className="flex flex-col md:flex-row items-start justify-center px-6 md:px-16 lg:px-32 gap-10 py-14 border-b border-gray-500/30 text-gray-500">
         <div className="w-4/5">
-          <Image className="w-28 md:w-32" src={assets.logo} alt="logo" />
+          <Image className="w-28 md:w-32" src={assets.logo} alt="logo" sizes="(max-width: 768px) 112px, 128px" />
           <p className="mt-6 text-sm">
             KeyHub mang đến các dòng bàn phím cơ được tuyển chọn kỹ lưỡng, từ
             gaming hiệu năng cao đến setup tối giản cho công việc hằng ngày.

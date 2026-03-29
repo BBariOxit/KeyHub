@@ -18,6 +18,8 @@ const Navbar = () => {
         onClick={() => router.push('/')}
         src={assets.logo}
         alt="logo"
+        sizes="(max-width: 768px) 112px, 128px"
+        priority
       />
       <div className="absolute left-1/2 -translate-x-1/2 hidden md:flex items-center gap-4 lg:gap-8">
         <Link href="/" className="hover:text-gray-900 transition">

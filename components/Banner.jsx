@@ -9,6 +9,8 @@ const Banner = () => {
         className="w-full max-w-64 md:max-w-72 lg:max-w-80"
         src={assets.banner_1}
         alt="banner_1"
+        sizes="(max-width: 768px) 256px, (max-width: 1024px) 288px, 320px"
+        loading="lazy"
       />
       <div className="flex flex-col items-center justify-center text-center space-y-2 px-4 md:px-0">
         <h2 className="text-2xl md:text-3xl font-semibold max-w-[290px]">
@@ -26,6 +28,8 @@ const Banner = () => {
         className="hidden md:block w-full max-w-72 lg:max-w-80 md:mr-1"
         src={assets.banner_2}
         alt="banner_2"
+        sizes="(max-width: 1024px) 288px, 320px"
+        loading="lazy"
       />
     </div>
   );

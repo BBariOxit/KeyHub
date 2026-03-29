@@ -7,7 +7,21 @@ export async function GET(req) {
   
     await connectDB()
 
-    const products = await Product.find({})
+    const products = await Product.find(
+      {},
+      {
+        name: 1,
+        description: 1,
+        price: 1,
+        offerPrice: 1,
+        image: 1,
+        category: 1,
+        date: 1,
+      }
+    )
+      .sort({ date: -1 })
+      .lean()
+
     return NextResponse.json({ success: true, products }) 
   } catch (error) {
     console.error('Product list error:', error)

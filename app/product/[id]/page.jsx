@@ -10,6 +10,7 @@ import Loading from "@/components/Loading";
 import { useAppContext } from "@/context/AppContext";
 import React from "react";
 import { formatVnd } from "@/lib/price";
+import { optimizeCloudinaryImage } from "@/lib/image";
 
 const Product = () => {
 
@@ -33,11 +34,13 @@ const Product = () => {
                 <div className="px-5 lg:px-16 xl:px-20">
                     <div className="rounded-lg overflow-hidden bg-gray-500/10 mb-4 h-[360px] md:h-[420px] flex items-center justify-center">
                         <Image
-                            src={mainImage || productData.image[0]}
+                            src={optimizeCloudinaryImage(mainImage || productData.image[0], { width: 900, quality: "auto" }) || productData.image[0]}
                             alt="alt"
                             className="w-full h-full object-contain p-2 scale-105"
                             width={1280}
                             height={720}
+                            priority
+                            sizes="(max-width: 768px) 92vw, (max-width: 1280px) 48vw, 640px"
                         />
                     </div>
 
@@ -49,11 +52,13 @@ const Product = () => {
                                 className="cursor-pointer rounded-lg overflow-hidden bg-gray-500/10 h-24 md:h-28 flex items-center justify-center"
                             >
                                 <Image
-                                    src={image}
+                                    src={optimizeCloudinaryImage(image, { width: 220, quality: "auto" }) || image}
                                     alt="alt"
                                     className="w-full h-full object-contain p-1 scale-105"
                                     width={1280}
                                     height={720}
+                                    sizes="(max-width: 768px) 22vw, 120px"
+                                    loading="lazy"
                                 />
                             </div>
 
