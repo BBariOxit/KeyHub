@@ -2,7 +2,7 @@
 import { useAuth, useClerk, useUser } from "@clerk/nextjs";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import debounce from 'lodash/debounce';
 import { useCallback } from 'react';
@@ -26,12 +26,15 @@ export const AppContextProvider = (props) => {
     const [userData, setUserData] = useState(false)
     const [isSeller, setIsSeller] = useState(false)
     const [cartItems, setCartItems] = useState({})
+    const isMountedRef = useRef(true)
 
     const fetchProductData = async () => {
         try {
             const { data } = await axios.get('/api/product/list')
             if (data.success) {
-                setProducts(data.products)
+                if (isMountedRef.current) {
+                    setProducts(data.products)
+                }
             } else {
                 toast.error(data.message)
             }
@@ -50,8 +53,10 @@ export const AppContextProvider = (props) => {
             }
             const { data } = await axios.get('/api/user/data', { headers: { Authorization: `Bearer ${token}` } }) 
             if (data.success) {
-                setUserData(data.user)
-                setCartItems(data.user.cartItems)
+                if (isMountedRef.current) {
+                    setUserData(data.user)
+                    setCartItems(data.user.cartItems)
+                }
             } else {
                 toast.error(data.message)
             }
@@ -77,6 +82,13 @@ export const AppContextProvider = (props) => {
             }
         }, 500),[]
     )
+
+    useEffect(() => {
+        return () => {
+            isMountedRef.current = false
+            debouncedSyncCart.cancel()
+        }
+    }, [debouncedSyncCart])
 
     const addToCart = async (itemId) => {
         if (!user) {

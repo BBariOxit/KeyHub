@@ -38,6 +38,8 @@ const FeaturedProduct = () => {
               src={image}
               alt={title}
               className="group-hover:brightness-75 transition duration-300 w-full h-[22rem] md:h-[28rem] object-cover"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              loading="lazy"
             />
             <div className="group-hover:-translate-y-4 transition duration-300 absolute bottom-8 left-8 right-8 text-white space-y-2">
               <p className="font-medium text-xl lg:text-2xl">{title}</p>

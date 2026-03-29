@@ -1,3 +1,4 @@
+"use client"
 import React, { useState, useEffect } from "react";
 import { assets } from "@/assets/assets";
 import Image from "next/image";
@@ -47,9 +48,7 @@ const HeaderSlider = () => {
     <div className="overflow-hidden relative w-full">
       <div
         className="flex transition-transform duration-700 ease-in-out"
-        style={{
-          transform: `translateX(-${currentSlide * 100}%)`,
-        }}
+        style={{ transform: `translateX(-${currentSlide * 100}%)` }}
       >
         {sliderData.map((slide, index) => (
           <div
@@ -76,6 +75,8 @@ const HeaderSlider = () => {
                 className="w-[260px] md:w-[420px] lg:w-[500px] h-[140px] md:h-[220px] lg:h-[260px] object-contain"
                 src={slide.imgSrc}
                 alt={`Slide ${index + 1}`}
+                priority={index === 0}
+                sizes="(max-width: 768px) 260px, (max-width: 1024px) 420px, 500px"
               />
             </div>
           </div>
