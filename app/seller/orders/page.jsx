@@ -62,7 +62,7 @@ const Orders = () => {
                                 />
                                 <p className="flex flex-col gap-2 min-w-0 leading-7">
                                     <span className="font-medium text-base break-words">
-                                        {order.items.map((item) => item.product.name + ` x ${item.quantity}`).join(", ")}
+                                        {order.items.map((item) => (item.product?.name || "Sản phẩm đã gỡ") + ` x ${item.quantity}`).join(", ")}
                                     </span>
                                     <span>Số sản phẩm: {order.items.length}</span>
                                 </p>

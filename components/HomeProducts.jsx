@@ -2,10 +2,11 @@
 import React from "react";
 import ProductCard from "./ProductCard";
 import { useAppContext } from "@/context/AppContext";
+import Link from "next/link";
 
 const HomeProducts = ({ initialProducts = [] }) => {
 
-  const { products, router } = useAppContext()
+  const { products } = useAppContext()
   const displayProducts = initialProducts.length > 0 ? initialProducts : products
 
   return (
@@ -14,9 +15,9 @@ const HomeProducts = ({ initialProducts = [] }) => {
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 flex-col items-center gap-6 mt-6 pb-14 w-full">
         {displayProducts.map((product) => <ProductCard key={product._id} product={product} />)}
       </div>
-      <button onClick={() => { router.push('/all-products') }} className="px-12 py-2.5 border rounded text-gray-500/70 hover:bg-slate-50/90 transition">
+      <Link href='/all-products' className="px-12 py-2.5 border rounded text-gray-500/70 hover:bg-slate-50/90 transition inline-block">
         Xem thêm
-      </button>
+      </Link>
     </div>
   );
 };

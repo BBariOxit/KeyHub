@@ -5,6 +5,7 @@ import ProductCard from "@/components/ProductCard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Image from "next/image";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import Loading from "@/components/Loading";
 import { useAppContext } from "@/context/AppContext";
@@ -41,6 +42,7 @@ const Product = () => {
                             height={720}
                             priority
                             sizes="(max-width: 768px) 92vw, (max-width: 1280px) 48vw, 640px"
+                            unoptimized
                         />
                     </div>
 
@@ -59,6 +61,7 @@ const Product = () => {
                                     height={720}
                                     sizes="(max-width: 768px) 22vw, 120px"
                                     loading="lazy"
+                                    unoptimized
                                 />
                             </div>
 
@@ -138,9 +141,9 @@ const Product = () => {
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mt-6 pb-14 w-full">
                     {products.slice(0, 5).map((product) => <ProductCard key={product._id} product={product} />)}
                 </div>
-                <button onClick={() => router.push('/all-products')} className="px-8 py-2 mb-16 border rounded text-gray-500/70 hover:bg-slate-50/90 transition">
+                <Link href='/all-products' className="px-8 py-2 mb-16 border rounded text-gray-500/70 hover:bg-slate-50/90 transition inline-block text-center">
                     Xem thêm
-                </button>
+                </Link>
             </div>
         </div>
         <Footer />
