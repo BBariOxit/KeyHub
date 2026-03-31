@@ -61,7 +61,7 @@ const MyOrders = () => {
                                         <div className="space-y-1 text-base font-semibold text-gray-800">
                                             {order.items.map((item, itemIndex) => (
                                                 <p key={item.product?._id || `${itemIndex}-${item.quantity}`} className="leading-7">
-                                                    {item.product.name} x {item.quantity}
+                                                    {item.product?.name || "Sản phẩm đã gỡ"} x {item.quantity}
                                                 </p>
                                             ))}
                                         </div>

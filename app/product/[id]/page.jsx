@@ -42,8 +42,6 @@ const Product = () => {
                             height={720}
                             priority
                             sizes="(max-width: 768px) 92vw, (max-width: 1280px) 48vw, 640px"
-                            placeholder="blur"
-                            blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mO8/x8AAr8B3gQySqkAAAAASUVORK5CYII="
                             unoptimized
                         />
                     </div>
@@ -63,8 +61,6 @@ const Product = () => {
                                     height={720}
                                     sizes="(max-width: 768px) 22vw, 120px"
                                     loading="lazy"
-                                    placeholder="blur"
-                                    blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mO8/x8AAr8B3gQySqkAAAAASUVORK5CYII="
                                     unoptimized
                                 />
                             </div>

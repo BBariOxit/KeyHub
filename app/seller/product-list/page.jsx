@@ -9,6 +9,7 @@ import axios from "axios";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { formatVnd } from "@/lib/price";
+import { optimizeCloudinaryImage } from "@/lib/image";
 
 const ProductList = () => {
 
@@ -61,12 +62,13 @@ const ProductList = () => {
                 <tr key={product._id} className="border-t border-gray-500/20">
                   <td className="md:px-4 pl-2 md:pl-4 py-3 flex items-center space-x-3 truncate">
                     <div className="bg-gray-500/10 rounded p-2">
-                      <Image
-                        src={product.image[0]}
+                       <Image
+                        src={optimizeCloudinaryImage(product.image[0], { width: 120, quality: 'auto' }) || product.image[0]}
                         alt="product Image"
                         className="w-16"
                         width={1280}
                         height={720}
+                        unoptimized
                       />
                     </div>
                     <span className="truncate w-full">

@@ -29,8 +29,6 @@ const ProductCard = ({ product }) => {
                     height={800}
                     sizes="(max-width: 768px) 45vw, (max-width: 1280px) 22vw, 200px"
                     loading="lazy"
-                    placeholder="blur"
-                    blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mO8/x8AAr8B3gQySqkAAAAASUVORK5CYII="
                     unoptimized
                 />
                 <button

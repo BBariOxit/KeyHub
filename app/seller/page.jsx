@@ -18,19 +18,20 @@ const AddProduct = () => {
   const [price, setPrice] = useState('');
   const [offerPrice, setOfferPrice] = useState('');
 
-  const previewUrls = useMemo(() => {
-    return files.map((file) => (file ? URL.createObjectURL(file) : null));
-  }, [files]);
+  const [previewUrls, setPreviewUrls] = useState([]);
 
   useEffect(() => {
+    const urls = files.map((file) => (file ? URL.createObjectURL(file) : null));
+    setPreviewUrls(urls);
+
     return () => {
-      previewUrls.forEach((url) => {
+      urls.forEach((url) => {
         if (url) {
           URL.revokeObjectURL(url);
         }
       });
     };
-  }, [previewUrls]);
+  }, [files]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
