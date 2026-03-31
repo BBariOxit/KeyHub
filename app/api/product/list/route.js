@@ -2,6 +2,7 @@ import connectDB from "@/config/db";
 import Product from "@/models/Product";
 import { NextResponse } from "next/server";
 
+export const revalidate = 60;
 export async function GET(req) {
   try {
   

@@ -1,6 +1,7 @@
 import React from 'react'
 import { assets } from '@/assets/assets'
 import Image from 'next/image';
+import Link from 'next/link';
 import { useAppContext } from '@/context/AppContext';
 import { formatVnd } from '@/lib/price';
 import { optimizeCloudinaryImage } from '@/lib/image';
@@ -13,14 +14,10 @@ const ProductCard = ({ product }) => {
     const rating = Number.isFinite(product?.rating) ? product.rating : 4.5
     const cardImage = optimizeCloudinaryImage(product?.image?.[0], { width: 420, quality: 'auto' })
 
-    const handleCardClick = () => {
-        router.push('/product/' + product._id)
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-    }
-
     return (
-        <div
-            onClick={handleCardClick}
+        <Link
+            href={'/product/' + product._id}
+            scroll={true}
             className="flex flex-col items-start gap-0.5 max-w-[200px] w-full cursor-pointer"
         >
             <div className="cursor-pointer group relative bg-gray-500/10 rounded-lg w-full h-52 flex items-center justify-center">
@@ -32,6 +29,9 @@ const ProductCard = ({ product }) => {
                     height={800}
                     sizes="(max-width: 768px) 45vw, (max-width: 1280px) 22vw, 200px"
                     loading="lazy"
+                    placeholder="blur"
+                    blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mO8/x8AAr8B3gQySqkAAAAASUVORK5CYII="
+                    unoptimized
                 />
                 <button
                     type="button"
@@ -72,7 +72,7 @@ const ProductCard = ({ product }) => {
                     Mua ngay
                 </button> */}
             </div>
-        </div>
+        </Link>
     )
 }
 

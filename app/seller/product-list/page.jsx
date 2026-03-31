@@ -6,6 +6,7 @@ import { useAppContext } from "@/context/AppContext";
 import Footer from "@/components/seller/Footer";
 import Loading from "@/components/Loading";
 import axios from "axios";
+import Link from "next/link";
 import toast from "react-hot-toast";
 import { formatVnd } from "@/lib/price";
 
@@ -75,14 +76,14 @@ const ProductList = () => {
                   <td className="px-4 py-3 max-sm:hidden">{product.category}</td>
                   <td className="px-4 py-3">{formatVnd(product.offerPrice)} VND</td>
                   <td className="px-4 py-3 max-sm:hidden">
-                    <button onClick={() => router.push(`/product/${product._id}`)} className="flex items-center gap-1 px-1.5 md:px-3.5 py-2 bg-orange-600 text-white rounded-md">
+                    <Link href={`/product/${product._id}`} className="inline-flex items-center gap-1 px-1.5 md:px-3.5 py-2 bg-orange-600 text-white rounded-md">
                       <span className="hidden md:block">Xem</span>
                       <Image
                         className="h-3.5"
                         src={assets.redirect_icon}
                         alt="redirect_icon"
                       />
-                    </button>
+                    </Link>
                   </td>
                 </tr>
               ))}

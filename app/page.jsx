@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import connectDB from "@/config/db";
 import Product from "@/models/Product";
 
+export const revalidate = 60;
 async function getInitialProducts() {
   try {
     await connectDB();
