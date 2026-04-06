@@ -8,7 +8,7 @@ export async function GET(req) {
   
     await connectDB()
 
-    const products = await Product.find(
+    const productsRaw = await Product.find(
       {},
       {
         name: 1,
@@ -16,12 +16,21 @@ export async function GET(req) {
         price: 1,
         offerPrice: 1,
         image: 1,
+        categoryId: 1,
         category: 1,
+        stock: 1,
         date: 1,
       }
     )
+      .populate({ path: 'categoryId', select: 'name slug' })
       .sort({ date: -1 })
       .lean()
+
+    const products = productsRaw.map((product) => ({
+      ...product,
+      category: product?.categoryId?.name || product.category || '',
+      categorySlug: product?.categoryId?.slug || null
+    }))
 
     return NextResponse.json({ success: true, products }) 
   } catch (error) {
