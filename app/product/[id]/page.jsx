@@ -25,6 +25,14 @@ const Product = () => {
     }, [products, id]);
     const stock = Number.isFinite(productData?.stock) ? productData.stock : 0
     const isOutOfStock = stock <= 0
+    const isLowStock = stock > 0 && stock <= 2
+    const categoryDisplay = Array.isArray(productData?.categoryNames) && productData.categoryNames.length > 0
+        ? productData.categoryNames.join(', ')
+        : Array.isArray(productData?.category) && productData.category.length > 0
+            ? productData.category.join(', ')
+            : typeof productData?.category === 'string' && productData.category
+                ? productData.category
+                : 'Chưa phân loại'
 
     useEffect(() => {
         setMainImage(null)
@@ -100,26 +108,26 @@ const Product = () => {
                     </p>
                     <hr className="bg-gray-600 my-6" />
                     <div className="overflow-x-auto">
-                        <table className="table-auto border-collapse w-full max-w-72">
+                        <table className="table-fixed border-collapse w-full max-w-md">
                             <tbody>
                                 <tr>
-                                    <td className="text-gray-600 font-medium">Thương hiệu</td>
-                                    <td className="text-gray-800/50 ">KeyHub</td>
+                                    <td className="text-gray-600 font-medium whitespace-nowrap w-28 pr-5">Thương hiệu</td>
+                                    <td className="text-gray-800/50 pl-5">KeyHub</td>
                                 </tr>
                                 <tr>
-                                    <td className="text-gray-600 font-medium">Màu sắc</td>
-                                    <td className="text-gray-800/50 ">Nhiều màu</td>
+                                    <td className="text-gray-600 font-medium whitespace-nowrap w-28 pr-5">Màu sắc</td>
+                                    <td className="text-gray-800/50 pl-5">Nhiều màu</td>
                                 </tr>
                                 <tr>
-                                    <td className="text-gray-600 font-medium">Danh mục</td>
-                                    <td className="text-gray-800/50">
-                                        {productData.category || productData?.categoryId?.name || 'Chưa phân loại'}
+                                    <td className="text-gray-600 font-medium whitespace-nowrap w-28 pr-5">Danh mục</td>
+                                    <td className="text-gray-800/50 pl-5">
+                                        {categoryDisplay}
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td className="text-gray-600 font-medium">Tồn kho</td>
-                                    <td className={isOutOfStock ? "text-red-500 font-medium" : "text-emerald-600 font-medium"}>
-                                        {isOutOfStock ? 'Hết hàng' : `Còn ${stock} sản phẩm`}
+                                    <td className="text-gray-600 font-medium whitespace-nowrap w-28 pr-5">Số lượng</td>
+                                    <td className={`${isOutOfStock ? "text-red-500 font-medium" : isLowStock ? "text-amber-600 font-medium" : "text-emerald-600 font-medium"} pl-5`}>
+                                        {isOutOfStock ? 'Hết hàng' : isLowStock ? `Sắp hết (${stock})` : `Còn ${stock} sản phẩm`}
                                     </td>
                                 </tr>
                             </tbody>

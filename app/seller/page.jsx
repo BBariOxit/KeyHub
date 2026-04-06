@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { assets } from "@/assets/assets";
 import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
@@ -15,12 +15,14 @@ const AddProduct = () => {
   const [files, setFiles] = useState([]);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [categoryId, setCategoryId] = useState('');
+  const [categoryIds, setCategoryIds] = useState([]);
   const [price, setPrice] = useState('');
   const [offerPrice, setOfferPrice] = useState('');
   const [stock, setStock] = useState('0');
+  const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
+  const categoryRef = useRef(null)
 
   const [previewUrls, setPreviewUrls] = useState([]);
 
@@ -45,9 +47,36 @@ const AddProduct = () => {
 
   useEffect(() => {
     if (categories.length > 0) {
-      setCategoryId((prev) => prev || categories[0]._id)
+      setCategoryIds((prev) => (prev.length > 0 ? prev : [categories[0]._id]))
     }
   }, [categories])
+
+  useEffect(() => {
+    const onOutsideClick = (event) => {
+      if (!categoryRef.current) return
+      if (!categoryRef.current.contains(event.target)) {
+        setCategoryMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', onOutsideClick)
+    return () => document.removeEventListener('mousedown', onOutsideClick)
+  }, [])
+
+  const selectedCategories = useMemo(() => {
+    if (!Array.isArray(categories) || categories.length === 0) return []
+    return categories.filter((item) => categoryIds.includes(item._id))
+  }, [categories, categoryIds])
+
+  const toggleCategory = (id) => {
+    setCategoryIds((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter((item) => item !== id)
+      }
+      return [...prev, id]
+    })
+    clearError('categoryIds')
+  }
 
   const clearError = (fieldName) => {
     setFieldErrors((prev) => {
@@ -67,10 +96,15 @@ const AddProduct = () => {
       return
     }
 
+    if (categoryIds.length === 0) {
+      setFieldErrors({ categoryIds: 'Vui lòng chọn ít nhất một danh mục' })
+      return
+    }
+
     const formData = new FormData()
     formData.append('name', name)
     formData.append('description', description)
-    formData.append('categoryId', categoryId)
+    categoryIds.forEach((id) => formData.append('categoryIds', id))
     formData.append('price', getNumericString(price))
     formData.append('offerPrice', getNumericString(offerPrice))
     formData.append('stock', stock)
@@ -91,12 +125,16 @@ const AddProduct = () => {
         setFiles([])
         setName('')
         setDescription('')
-        setCategoryId(categories[0]?._id || '')
+        setCategoryIds(categories[0]?._id ? [categories[0]._id] : [])
         setPrice('')
         setOfferPrice('')
         setStock('0')
         setFieldErrors({})
-        await fetchProductData()
+        try {
+          await fetchProductData()
+        } catch {
+          // Bỏ qua lỗi refresh list để không hiển thị toast lỗi sau khi tạo thành công.
+        }
       } else {
         if (Array.isArray(data.errors)) {
           const nextErrors = {}
@@ -186,50 +224,125 @@ const AddProduct = () => {
             required
           ></textarea>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-4">
           <div className="flex flex-col gap-1 w-full min-w-0">
-            <label className="text-base font-medium" htmlFor="category">
+            <label className="text-base font-medium" htmlFor="category-dropdown">
               Danh mục
             </label>
-            <select
-              id="category"
-              className="w-full min-w-0 outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
-              onChange={(e) => {
-                setCategoryId(e.target.value)
-                clearError('categoryId')
-              }}
-              value={categoryId}
-              disabled={categories.length === 0 || categoriesLoading}
-            >
-              {categoriesLoading && <option value="">Đang tải danh mục...</option>}
-              {!categoriesLoading && categories.length === 0 && <option value="">Chưa có danh mục</option>}
-              {categories.map((item) => (
-                <option key={item._id} value={item._id}>{item.name}</option>
-              ))}
-            </select>
-            {fieldErrors.categoryId && <p className="text-xs text-red-500">{fieldErrors.categoryId}</p>}
+            <div ref={categoryRef} className="relative">
+              <button
+                id="category-dropdown"
+                type="button"
+                onClick={() => !categoriesLoading && setCategoryMenuOpen((prev) => !prev)}
+                disabled={categories.length === 0 || categoriesLoading}
+                className="w-full min-h-[44px] outline-none py-2 px-3 rounded border border-gray-500/40 flex items-center justify-between gap-3 text-left"
+              >
+                <div className="flex-1 overflow-x-auto whitespace-nowrap">
+                  {selectedCategories.length === 0 ? (
+                    <span className="text-gray-400 text-sm">
+                      {categoriesLoading ? 'Đang tải danh mục...' : 'Chọn danh mục'}
+                    </span>
+                  ) : (
+                    <div className="inline-flex items-center gap-2">
+                      {selectedCategories.map((item) => (
+                        <span key={item._id} className="inline-flex items-center gap-1 rounded-full bg-orange-100 text-orange-700 px-2.5 py-1 text-xs font-medium">
+                          {item.name}
+                          <span
+                            role="button"
+                            tabIndex={0}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              toggleCategory(item._id)
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                toggleCategory(item._id)
+                              }
+                            }}
+                            className="text-orange-600 hover:text-orange-800"
+                          >
+                            x
+                          </span>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <span className={`text-gray-500 transition-transform ${categoryMenuOpen ? 'rotate-180' : ''}`}>▾</span>
+              </button>
+
+              {categoryMenuOpen && categories.length > 0 && (
+                <div className="absolute z-20 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-56 overflow-y-auto">
+                  {categories.map((item) => {
+                    const selected = categoryIds.includes(item._id)
+                    return (
+                      <button
+                        key={item._id}
+                        type="button"
+                        onClick={() => toggleCategory(item._id)}
+                        className={`w-full px-3 py-2.5 text-sm text-left flex items-center justify-between hover:bg-gray-50 ${selected ? 'text-orange-700 bg-orange-50/60' : 'text-gray-700'}`}
+                      >
+                        <span>{item.name}</span>
+                        {selected && <span className="text-orange-600">✓</span>}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+
+            {fieldErrors.categoryIds && <p className="text-xs text-red-500">{fieldErrors.categoryIds}</p>}
             {categories.length === 0 && (
               <Link href="/seller/categories" className="text-xs text-orange-600 hover:underline">
                 Tạo danh mục ngay
               </Link>
             )}
           </div>
+
           <div className="flex flex-col gap-1 w-full">
             <label className="text-base font-medium" htmlFor="stock">
-              Tồn kho
+              Số lượng
             </label>
-            <input
-              id="stock"
-              type="number"
-              min={0}
-              className="w-full outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
-              onChange={(e) => {
-                setStock(e.target.value)
-                clearError('stock')
-              }}
-              value={stock}
-              required
-            />
+            <div className="relative">
+              <input
+                id="stock"
+                type="number"
+                min={0}
+                className="w-full outline-none pl-3 pr-10 py-2.5 rounded border border-gray-500/40"
+                onChange={(e) => {
+                  setStock(e.target.value)
+                  clearError('stock')
+                }}
+                value={stock}
+                required
+              />
+              <div className="absolute right-1.5 top-1.5 bottom-1.5 w-6 rounded-md border border-gray-200 overflow-hidden bg-white">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStock(String(Number(stock || 0) + 1))
+                    clearError('stock')
+                  }}
+                  className="h-1/2 w-full flex items-center justify-center hover:bg-gray-100 border-b border-gray-200"
+                  aria-label="Tăng số lượng"
+                >
+                  <span className="w-0 h-0 border-l-[4px] border-r-[4px] border-l-transparent border-r-transparent border-b-[6px] border-b-gray-500" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStock(String(Math.max(0, Number(stock || 0) - 1)))
+                    clearError('stock')
+                  }}
+                  className="h-1/2 w-full flex items-center justify-center hover:bg-gray-100"
+                  aria-label="Giảm số lượng"
+                >
+                  <span className="w-0 h-0 border-l-[4px] border-r-[4px] border-l-transparent border-r-transparent border-t-[6px] border-t-gray-500" />
+                </button>
+              </div>
+            </div>
             {fieldErrors.stock && <p className="text-xs text-red-500">{fieldErrors.stock}</p>}
           </div>
         </div>

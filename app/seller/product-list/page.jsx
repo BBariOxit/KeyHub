@@ -58,7 +58,7 @@ const ProductList = () => {
               <tr>
                 <th className="px-4 py-3 font-medium truncate">Sản phẩm</th>
                 <th className="px-4 py-3 font-medium truncate max-sm:hidden">Danh mục</th>
-                <th className="px-4 py-3 font-medium truncate max-sm:hidden">Tồn kho</th>
+                <th className="px-4 py-3 font-medium truncate max-sm:hidden">Số lượng</th>
                 <th className="px-4 py-3 font-medium truncate text-left">
                   Giá
                 </th>
@@ -87,7 +87,12 @@ const ProductList = () => {
                   <td className="px-4 py-3 max-sm:hidden">
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-gray-700">{product.stock ?? 0}</span>
-                      {(product.stock ?? 0) < 5 && (
+                      {(product.stock ?? 0) === 0 && (
+                        <span className="px-2 py-0.5 text-[11px] rounded-full bg-red-100 text-red-600 font-medium">
+                          Hết hàng
+                        </span>
+                      )}
+                      {(product.stock ?? 0) > 0 && (product.stock ?? 0) <= 2 && (
                         <span className="px-2 py-0.5 text-[11px] rounded-full bg-amber-100 text-amber-700 font-medium">
                           Sắp hết
                         </span>

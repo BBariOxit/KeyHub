@@ -1,9 +1,10 @@
-import { inngest } from "@/config/inngest";
 import connectDB from "@/config/db";
 import Address from "@/models/Address";
+import Order from "@/models/Order";
 import Product from "@/models/Product";
 import User from "@/models/User";
 import { getAuth } from "@clerk/nextjs/server";
+import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 import z from "zod";
 
@@ -18,6 +19,7 @@ const orderCreateSchema = z.object({
 })
 
 export async function POST(req) {
+  let session
   try {
     const { userId } = getAuth(req)
     if (!userId) {
@@ -42,50 +44,87 @@ export async function POST(req) {
 
     const productIds = [...new Set(items.map(item => item.product))]
 
+    const quantityByProduct = items.reduce((acc, item) => {
+      acc.set(item.product, (acc.get(item.product) || 0) + Number(item.quantity))
+      return acc
+    }, new Map())
+
     await connectDB()
 
-    const addressDoc = await Address.findOne({ _id: address, userId }).select('_id').lean()
-    if (!addressDoc) {
-      return NextResponse.json({ success: false, message: 'Địa chỉ giao hàng không hợp lệ.' }, { status: 400 })
-    }
-    
-    // Truy vấn tất cả sản phẩm trong 1 lần duy nhất để tối ưu hiệu năng
-    const products = await Product.find({ _id: { $in: productIds } }).select('_id offerPrice').lean()
+    session = await mongoose.startSession()
 
-    if (products.length !== productIds.length) {
-      return NextResponse.json({ success: false, message: 'Một số sản phẩm không còn tồn tại.' }, { status: 400 })
-    }
-
-    const productPriceMap = new Map(products.map(product => [product._id.toString(), product.offerPrice]))
-
-    // Tính toán tổng tiền (amount)
-    let amount = 0
-    for (const item of items) {
-      const productPrice = productPriceMap.get(item.product)
-      if (typeof productPrice !== 'number') {
-        return NextResponse.json({ success: false, message: 'Dữ liệu sản phẩm không hợp lệ.' }, { status: 400 })
+    const result = await session.withTransaction(async () => {
+      const addressDoc = await Address.findOne({ _id: address, userId }).session(session).select('_id').lean()
+      if (!addressDoc) {
+        return { error: 'Địa chỉ giao hàng không hợp lệ.' }
       }
-      amount += productPrice * item.quantity
-    }
 
-  
-    await inngest.send({
-      name: 'order/created',
-      data: {
-        userId,
-        address,
-        items,
-        amount: amount + Math.floor(amount * 0.02),
-        date: Date.now()
+      const products = await Product.find({ _id: { $in: productIds } })
+        .session(session)
+        .select('_id offerPrice stock')
+        .lean()
+
+      if (products.length !== productIds.length) {
+        return { error: 'Một số sản phẩm không còn tồn tại.' }
       }
+
+      const productMap = new Map(products.map((product) => [product._id.toString(), product]))
+
+      let amount = 0
+      for (const item of items) {
+        const product = productMap.get(item.product)
+        if (!product || typeof product.offerPrice !== 'number') {
+          return { error: 'Dữ liệu sản phẩm không hợp lệ.' }
+        }
+
+        if ((product.stock ?? 0) < item.quantity) {
+          return { error: `Sản phẩm ${product._id.toString()} không đủ tồn kho.` }
+        }
+
+        amount += product.offerPrice * item.quantity
+      }
+
+      for (const [productId, quantity] of quantityByProduct.entries()) {
+        const updated = await Product.updateOne(
+          { _id: productId, stock: { $gte: quantity } },
+          { $inc: { stock: -quantity } },
+          { session }
+        )
+
+        if (!updated.modifiedCount) {
+          return { error: 'Một hoặc nhiều sản phẩm đã hết hàng. Vui lòng thử lại.' }
+        }
+      }
+
+      await Order.create([
+        {
+          userId,
+          items: items.map((item) => ({
+            product: item.product,
+            quantity: Number(item.quantity)
+          })),
+          amount: amount + Math.floor(amount * 0.02),
+          address,
+          date: Date.now()
+        }
+      ], { session })
+
+      await User.findByIdAndUpdate(userId, { cartItems: {} }, { session })
+
+      return { success: true }
     })
 
-    // clear user cart
-    await User.findByIdAndUpdate(userId, { cartItems: {} })
+    if (!result?.success) {
+      return NextResponse.json({ success: false, message: result?.error || 'Không thể tạo đơn hàng lúc này.' }, { status: 400 })
+    }
 
     return NextResponse.json({ success: true, message: 'đặt hàng thành công' })
   } catch (error) {
     console.error("Order Error:", error)
     return NextResponse.json({ success: false, message: 'Không thể tạo đơn hàng lúc này.' }, { status: 500 })
+  } finally {
+    if (session) {
+      await session.endSession()
+    }
   }
 }
