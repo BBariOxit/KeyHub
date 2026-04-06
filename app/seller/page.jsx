@@ -1,22 +1,27 @@
 'use client'
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { assets } from "@/assets/assets";
 import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { formatThousandsInput, getNumericString } from "@/lib/price";
+import Link from "next/link";
 
 const AddProduct = () => {
 
-  const { getToken } = useAppContext()
+  const { getToken, fetchProductData } = useAppContext()
 
   const [files, setFiles] = useState([]);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('Keyboard');
+  const [categoryId, setCategoryId] = useState('');
+  const [categories, setCategories] = useState([]);
   const [price, setPrice] = useState('');
   const [offerPrice, setOfferPrice] = useState('');
+  const [stock, setStock] = useState('0');
+  const [submitting, setSubmitting] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const [previewUrls, setPreviewUrls] = useState([]);
 
@@ -33,21 +38,60 @@ const AddProduct = () => {
     };
   }, [files]);
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const { data } = await axios.get('/api/category/list')
+        if (data.success) {
+          setCategories(data.categories || [])
+          if (data.categories?.length > 0) {
+            setCategoryId((prev) => prev || data.categories[0]._id)
+          }
+        } else {
+          toast.error(data.message || 'Không thể tải danh mục')
+        }
+      } catch (error) {
+        toast.error(error.response?.data?.message || error.message)
+      }
+    }
+
+    fetchCategories()
+  }, [])
+
+  const clearError = (fieldName) => {
+    setFieldErrors((prev) => {
+      if (!prev[fieldName]) return prev
+      const next = { ...prev }
+      delete next[fieldName]
+      return next
+    })
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setFieldErrors({})
+
+    if (categories.length === 0) {
+      toast.error('Bạn cần tạo danh mục trước khi thêm sản phẩm')
+      return
+    }
 
     const formData = new FormData()
     formData.append('name', name)
     formData.append('description', description)
-    formData.append('category', category)
+    formData.append('categoryId', categoryId)
     formData.append('price', getNumericString(price))
     formData.append('offerPrice', getNumericString(offerPrice))
+    formData.append('stock', stock)
 
     for (let i = 0; i < files.length; i++) {
-      formData.append('images', files[i])
+      if (files[i]) {
+        formData.append('images', files[i])
+      }
     }
 
     try {
+      setSubmitting(true)
       const token = await getToken()
       const { data } = await axios.post('/api/product/add', formData, {headers: {Authorization: `Bearer ${token}`}})
 
@@ -56,21 +100,47 @@ const AddProduct = () => {
         setFiles([])
         setName('')
         setDescription('')
-        setCategory('Keyboard')
+        setCategoryId(categories[0]?._id || '')
         setPrice('')
         setOfferPrice('')
+        setStock('0')
+        setFieldErrors({})
+        await fetchProductData()
       } else {
+        if (Array.isArray(data.errors)) {
+          const nextErrors = {}
+          data.errors.forEach((item) => {
+            if (!item?.path) return
+            if (!nextErrors[item.path]) {
+              nextErrors[item.path] = item.message
+            }
+          })
+          setFieldErrors(nextErrors)
+        }
         toast.error(data.message)
       }
     } catch (error) {
+      const apiErrors = error.response?.data?.errors
+      if (Array.isArray(apiErrors)) {
+        const nextErrors = {}
+        apiErrors.forEach((item) => {
+          if (!item?.path) return
+          if (!nextErrors[item.path]) {
+            nextErrors[item.path] = item.message
+          }
+        })
+        setFieldErrors(nextErrors)
+      }
       toast.error(error.response?.data?.message || error.message)
+    } finally {
+      setSubmitting(false)
     }
 
   };
 
   return (
     <div className="flex-1 min-h-screen flex flex-col justify-between">
-      <form onSubmit={handleSubmit} className="md:p-10 p-4 space-y-5 max-w-lg">
+      <form onSubmit={handleSubmit} className="md:p-10 p-4 space-y-6 max-w-lg w-full">
         <div>
           <p className="text-base font-medium">Hình ảnh sản phẩm</p>
           <div className="flex flex-wrap items-center gap-3 mt-2">
@@ -94,7 +164,7 @@ const AddProduct = () => {
 
           </div>
         </div>
-        <div className="flex flex-col gap-1 max-w-md">
+        <div className="flex flex-col gap-1 w-full">
           <label className="text-base font-medium" htmlFor="product-name">
             Tên sản phẩm
           </label>
@@ -108,7 +178,7 @@ const AddProduct = () => {
             required
           />
         </div>
-        <div className="flex flex-col gap-1 max-w-md">
+        <div className="flex flex-col gap-1 w-full">
           <label
             className="text-base font-medium"
             htmlFor="product-description"
@@ -125,27 +195,55 @@ const AddProduct = () => {
             required
           ></textarea>
         </div>
-        <div className="flex items-center gap-5 flex-wrap">
-          <div className="flex flex-col gap-1 w-32">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex flex-col gap-1 w-full min-w-0">
             <label className="text-base font-medium" htmlFor="category">
               Danh mục
             </label>
             <select
               id="category"
-              className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
-              onChange={(e) => setCategory(e.target.value)}
-              value={category}
+              className="w-full min-w-0 outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
+              onChange={(e) => {
+                setCategoryId(e.target.value)
+                clearError('categoryId')
+              }}
+              value={categoryId}
+              disabled={categories.length === 0}
             >
-              <option value="Keyboard">Bàn phím</option>
-              <option value="Mechanical Keyboard">Bàn phím cơ</option>
-              <option value="Wireless Keyboard">Bàn phím không dây</option>
-              <option value="Gaming Keyboard">Bàn phím gaming</option>
-              <option value="Office Keyboard">Bàn phím văn phòng</option>
-              <option value="Keycap">Keycap</option>
-              <option value="Accessories">Phụ kiện</option>
+              {categories.length === 0 && <option value="">Chưa có danh mục</option>}
+              {categories.map((item) => (
+                <option key={item._id} value={item._id}>{item.name}</option>
+              ))}
             </select>
+            {fieldErrors.categoryId && <p className="text-xs text-red-500">{fieldErrors.categoryId}</p>}
+            {categories.length === 0 && (
+              <Link href="/seller/categories" className="text-xs text-orange-600 hover:underline">
+                Tạo danh mục ngay
+              </Link>
+            )}
           </div>
-          <div className="flex flex-col gap-1 w-32">
+          <div className="flex flex-col gap-1 w-full">
+            <label className="text-base font-medium" htmlFor="stock">
+              Tồn kho
+            </label>
+            <input
+              id="stock"
+              type="number"
+              min={0}
+              className="w-full outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
+              onChange={(e) => {
+                setStock(e.target.value)
+                clearError('stock')
+              }}
+              value={stock}
+              required
+            />
+            {fieldErrors.stock && <p className="text-xs text-red-500">{fieldErrors.stock}</p>}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex flex-col gap-1 w-full">
             <label className="text-base font-medium" htmlFor="product-price">
               Giá sản phẩm
             </label>
@@ -154,13 +252,14 @@ const AddProduct = () => {
               type="text"
               inputMode="numeric"
               placeholder="0"
-              className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
+              className="w-full outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
               onChange={(e) => setPrice(getNumericString(e.target.value))}
               value={formatThousandsInput(price)}
               required
             />
+            {fieldErrors.price && <p className="text-xs text-red-500">{fieldErrors.price}</p>}
           </div>
-          <div className="flex flex-col gap-1 w-32">
+          <div className="flex flex-col gap-1 w-full">
             <label className="text-base font-medium" htmlFor="offer-price">
               Giá ưu đãi
             </label>
@@ -169,14 +268,17 @@ const AddProduct = () => {
               type="text"
               inputMode="numeric"
               placeholder="0"
-              className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
+              className="w-full outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
               onChange={(e) => setOfferPrice(getNumericString(e.target.value))}
               value={formatThousandsInput(offerPrice)}
               required
             />
+            {fieldErrors.offerPrice && <p className="text-xs text-red-500">{fieldErrors.offerPrice}</p>}
           </div>
         </div>
-        <button type="submit" className="px-8 py-2.5 bg-orange-600 text-white font-medium rounded">
+        {fieldErrors.name && <p className="text-xs text-red-500">{fieldErrors.name}</p>}
+        {fieldErrors.description && <p className="text-xs text-red-500">{fieldErrors.description}</p>}
+        <button disabled={submitting} type="submit" className={`px-8 py-2.5 text-white font-medium rounded ${submitting ? 'bg-orange-400 cursor-not-allowed' : 'bg-orange-600'}`}>
           THÊM
         </button>
       </form>

@@ -48,28 +48,41 @@ const Orders = () => {
     }, [user, fetchSellerOrders])
 
     return (
-        <div className="flex-1 h-screen overflow-scroll flex flex-col justify-between text-sm">
-            {loading ? <Loading /> : <div className="md:p-10 p-4 space-y-5">
-                <h2 className="text-lg font-medium">Đơn hàng</h2>
-                <div className="max-w-6xl rounded-md">
+            <div className="flex-1 h-screen overflow-scroll flex flex-col justify-between text-sm bg-gradient-to-b from-orange-50/30 via-white to-white">
+                {loading ? <Loading /> : <div className="md:p-10 p-4 space-y-5">
+                    <div className="flex items-center justify-between max-w-6xl">
+                        <h2 className="text-2xl font-semibold text-gray-800">Đơn hàng</h2>
+                        <span className="px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-semibold">
+                            {orders.length} đơn
+                        </span>
+                    </div>
+                    <div className="max-w-6xl space-y-4">
+                        <div className="hidden md:grid md:grid-cols-[2.3fr_1.45fr_1.15fr_1.45fr] gap-5 px-4 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                            <p>Sản phẩm</p>
+                            <p>Thông tin nhận hàng</p>
+                            <p>Tổng tiền</p>
+                            <p>Thanh toán</p>
+                        </div>
                     {orders.map((order, index) => (
-                        <div key={order._id || index} className="grid grid-cols-1 md:grid-cols-[2.35fr_1.45fr_1.2fr_1.5fr] gap-5 md:gap-x-7 md:gap-y-6 p-6 border-t border-gray-300 md:items-center">
-                            <div className="flex items-center gap-5 md:gap-6 min-w-0">
+                            <div key={order._id || index} className="grid grid-cols-1 md:grid-cols-[2.3fr_1.45fr_1.15fr_1.45fr] gap-5 md:gap-x-7 md:gap-y-6 p-6 border border-gray-200 rounded-2xl md:items-center bg-white shadow-sm hover:shadow-md transition-shadow">
+                                <div className="flex items-center gap-5 md:gap-6 min-w-0">
                                 <Image
-                                    className="w-16 h-16 object-cover shrink-0"
+                                        className="w-16 h-16 object-cover shrink-0 bg-orange-50 border border-orange-200 rounded-xl p-2"
                                     src={assets.box_icon}
                                     alt="box_icon"
                                 />
                                 <p className="flex flex-col gap-2 min-w-0 leading-7">
+                                        <span className="text-xs font-semibold text-gray-500 md:hidden uppercase">Sản phẩm</span>
                                     <span className="font-medium text-base break-words">
                                         {order.items.map((item) => (item.product?.name || "Sản phẩm đã gỡ") + ` x ${item.quantity}`).join(", ")}
                                     </span>
-                                    <span>Số sản phẩm: {order.items.length}</span>
+                                        <span className="text-gray-500">Số sản phẩm: {order.items.length}</span>
                                 </p>
                             </div>
-                            <div className="leading-7">
+                                <div className="leading-7 text-gray-700">
+                                    <p className="text-xs font-semibold text-gray-500 mb-1 md:hidden uppercase">Thông tin nhận hàng</p>
                                 <p>
-                                    <span className="font-medium">{order.address.fullName}</span>
+                                        <span className="font-semibold text-gray-800">{order.address.fullName}</span>
                                     <br />
                                     <span >{order.address.area}</span>
                                     <br />
@@ -78,12 +91,16 @@ const Orders = () => {
                                     <span>{order.address.phoneNumber}</span>
                                 </p>
                             </div>
-                            <p className="font-semibold md:text-lg md:text-center">{formatVnd(order.amount)} {currency}</p>
-                            <div className="leading-7 md:pl-2">
-                                <p className="flex flex-col">
-                                    <span>Phương thức: COD</span>
-                                    <span>Ngày: {new Date(order.date).toLocaleDateString('vi-VN')}</span>
-                                    <span>Thanh toán: Chưa thanh toán</span>
+                                <div>
+                                    <p className="text-xs font-semibold text-gray-500 mb-1 md:hidden uppercase">Tổng tiền</p>
+                                    <p className="font-semibold md:text-2xl text-gray-800">{formatVnd(order.amount)} <span className="text-base">{currency}</span></p>
+                                </div>
+                                <div className="leading-7 md:pl-2">
+                                    <p className="text-xs font-semibold text-gray-500 mb-1 md:hidden uppercase">Thanh toán</p>
+                                    <p className="flex flex-col gap-1.5">
+                                        <span className="inline-flex w-fit items-center px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-medium">Phương thức: COD</span>
+                                        <span className="inline-flex w-fit items-center px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-medium">Ngày: {new Date(order.date).toLocaleDateString('vi-VN')}</span>
+                                        <span className="inline-flex w-fit items-center px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-medium">Thanh toán: Chưa thanh toán</span>
                                 </p>
                             </div>
                         </div>
