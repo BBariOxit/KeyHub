@@ -14,6 +14,10 @@ async function getInitialProducts() {
   try {
     await connectDB();
 
+    const hasMultiCategorySchema = Boolean(Product.schema.path('categoryIds'))
+    const categoryProjection = hasMultiCategorySchema ? { categoryIds: 1 } : { categoryId: 1 }
+    const populatePath = hasMultiCategorySchema ? 'categoryIds' : 'categoryId'
+
     const productDocs = await Product.find(
       {},
       {
@@ -22,18 +26,56 @@ async function getInitialProducts() {
         price: 1,
         offerPrice: 1,
         image: 1,
+        ...categoryProjection,
         category: 1,
+        stock: 1,
         date: 1,
       }
     )
+      .populate({ path: populatePath, select: 'name slug' })
       .sort({ date: -1 })
       .limit(20)
       .lean();
 
-    return productDocs.map((product) => ({
-      ...product,
-      _id: product._id.toString(),
-    }));
+    const normalizedProducts = productDocs.map((product) => {
+      const populatedCategoryDocs = hasMultiCategorySchema
+        ? (Array.isArray(product?.categoryIds) ? product.categoryIds : [])
+        : (product?.categoryId ? [product.categoryId] : [])
+
+      const populatedCategoryNames = populatedCategoryDocs
+        .map((item) => item?.name)
+        .filter(Boolean)
+
+      const fallbackCategoryNames = Array.isArray(product?.category)
+        ? product.category.filter(Boolean)
+        : product?.category
+          ? [product.category]
+          : []
+
+      const resolvedCategoryNames = populatedCategoryNames.length > 0
+        ? populatedCategoryNames
+        : fallbackCategoryNames
+
+      const serializedCategoryIds = populatedCategoryDocs
+        .map((item) => ({
+          _id: item?._id ? item._id.toString() : null,
+          name: item?.name || '',
+          slug: item?.slug || null
+        }))
+        .filter((item) => item._id)
+
+      return {
+        ...product,
+        _id: product._id.toString(),
+        categoryIds: serializedCategoryIds,
+        categoryNames: resolvedCategoryNames,
+        category: resolvedCategoryNames.join(', '),
+        categorySlugs: serializedCategoryIds.map((item) => item.slug).filter(Boolean),
+        categorySlug: serializedCategoryIds[0]?.slug || null
+      }
+    })
+
+    return normalizedProducts;
   } catch (error) {
     console.error("Home product prefetch error:", error);
     return [];

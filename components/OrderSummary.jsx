@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 
 const OrderSummary = () => {
 
-  const { currency, router, getCartCount, getCartAmount, getToken, user, cartItems, setCartItems } = useAppContext()
+  const { currency, router, getCartCount, getCartAmount, getToken, user, cartItems, setCartItems, fetchProductData } = useAppContext()
   const [selectedAddress, setSelectedAddress] = useState(null)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -74,6 +74,7 @@ const OrderSummary = () => {
       if (data.success) {
         toast.success(data.message || 'Đặt hàng thành công!')
         setCartItems({})
+        await fetchProductData()
         router.push('/order-placed')
       } else {
         toast.error(data.message || 'Có lỗi xảy ra khi đặt hàng')

@@ -13,7 +13,7 @@ import { optimizeCloudinaryImage } from "@/lib/image";
 
 const ProductList = () => {
 
-  const { router, getToken, user } = useAppContext()
+  const { getToken, user } = useAppContext()
 
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
@@ -45,16 +45,24 @@ const ProductList = () => {
     <div className="flex-1 min-h-screen flex flex-col justify-between">
       {loading ? <Loading /> : <div className="w-full md:p-10 p-4">
         <h2 className="pb-4 text-lg font-medium">Tất cả sản phẩm</h2>
-        <div className="flex flex-col items-center max-w-4xl w-full overflow-hidden rounded-md bg-white border border-gray-500/20">
-          <table className=" table-fixed w-full overflow-hidden">
+        <div className="w-full overflow-x-auto rounded-md bg-white border border-gray-500/20">
+          <table className="table-fixed min-w-[980px] w-full overflow-hidden">
+            <colgroup>
+              <col className="w-[40%]" />
+              <col className="w-[15%]" />
+              <col className="w-[15%]" />
+              <col className="w-[15%]" />
+              <col className="w-[15%]" />
+            </colgroup>
             <thead className="text-gray-900 text-sm text-left">
               <tr>
-                <th className="w-2/3 md:w-2/5 px-4 py-3 font-medium truncate">Sản phẩm</th>
+                <th className="px-4 py-3 font-medium truncate">Sản phẩm</th>
                 <th className="px-4 py-3 font-medium truncate max-sm:hidden">Danh mục</th>
-                <th className="px-4 py-3 font-medium truncate">
+                <th className="px-4 py-3 font-medium truncate max-sm:hidden">Số lượng</th>
+                <th className="px-4 py-3 font-medium truncate text-left">
                   Giá
                 </th>
-                <th className="px-4 py-3 font-medium truncate max-sm:hidden">Thao tác</th>
+                <th className="px-4 py-3 font-medium truncate max-sm:hidden text-center">Thao tác</th>
               </tr>
             </thead>
             <tbody className="text-sm text-gray-500">
@@ -76,8 +84,23 @@ const ProductList = () => {
                     </span>
                   </td>
                   <td className="px-4 py-3 max-sm:hidden">{product.category}</td>
-                  <td className="px-4 py-3">{formatVnd(product.offerPrice)} VND</td>
                   <td className="px-4 py-3 max-sm:hidden">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-gray-700">{product.stock ?? 0}</span>
+                      {(product.stock ?? 0) === 0 && (
+                        <span className="px-2 py-0.5 text-[11px] rounded-full bg-red-100 text-red-600 font-medium">
+                          Hết hàng
+                        </span>
+                      )}
+                      {(product.stock ?? 0) > 0 && (product.stock ?? 0) <= 2 && (
+                        <span className="px-2 py-0.5 text-[11px] rounded-full bg-amber-100 text-amber-700 font-medium">
+                          Sắp hết
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">{formatVnd(product.offerPrice)} VND</td>
+                  <td className="px-4 py-3 max-sm:hidden text-center">
                     <Link href={`/product/${product._id}`} className="inline-flex items-center gap-1 px-1.5 md:px-3.5 py-2 bg-orange-600 text-white rounded-md">
                       <span className="hidden md:block">Xem</span>
                       <Image

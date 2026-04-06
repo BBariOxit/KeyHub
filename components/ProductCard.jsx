@@ -13,6 +13,23 @@ const ProductCard = ({ product }) => {
     const { currency, router } = useAppContext()
     const rating = Number.isFinite(product?.rating) ? product.rating : 4.5
     const cardImage = optimizeCloudinaryImage(product?.image?.[0], { width: 420, quality: 'auto' })
+    const stock = Number.isFinite(product?.stock) ? product.stock : 0
+    const isOutOfStock = stock <= 0
+    const isLowStock = stock > 0 && stock <= 2
+    const rawCategoryList = Array.isArray(product?.categoryNames) && product.categoryNames.length > 0
+        ? product.categoryNames
+        : Array.isArray(product?.category) && product.category.length > 0
+            ? product.category
+            : typeof product?.category === 'string' && product.category.trim() !== ''
+                ? [product.category]
+                : []
+
+    const categoryList = rawCategoryList
+        .flatMap((item) => String(item).split(','))
+        .map((item) => item.trim())
+        .filter(Boolean)
+
+    const categoryLabel = categoryList[0] || 'Chưa phân loại'
 
     return (
         <Link
@@ -45,6 +62,7 @@ const ProductCard = ({ product }) => {
             </div>
 
             <p className="md:text-base font-medium pt-2 w-full truncate">{product.name}</p>
+            <p className="w-full text-[11px] text-gray-500 truncate">{categoryLabel}</p>
             <p className="w-full text-xs text-gray-500/70 max-sm:hidden truncate">{product.description}</p>
             <div className="flex items-center gap-2">
                 <p className="text-xs">{rating}</p>
@@ -66,6 +84,9 @@ const ProductCard = ({ product }) => {
 
             <div className="flex items-end justify-between w-full mt-1">
                 <p className="text-base font-medium">{formatVnd(product.offerPrice)} {currency}</p>
+                <span className={`text-[11px] px-2 py-0.5 rounded-full ${isOutOfStock ? 'bg-red-100 text-red-600' : isLowStock ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                    {isOutOfStock ? 'Hết hàng' : isLowStock ? 'Sắp hết' : 'Còn hàng'}
+                </span>
                 {/* <button className=" max-sm:hidden px-4 py-1.5 text-gray-500 border border-gray-500/20 rounded-full text-xs hover:bg-slate-50 transition">
                     Mua ngay
                 </button> */}
