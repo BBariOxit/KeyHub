@@ -21,20 +21,29 @@ export const AppContextProvider = (props) => {
     const { user } = useUser()
     const { openSignIn } = useClerk()
     const { getToken } = useAuth()
+    const getTokenRef = useRef(getToken)
+    const userId = user?.id || null
+    const userRole = user?.publicMetadata?.role
 
     const [products, setProducts] = useState([])
     const [sellerProducts, setSellerProducts] = useState([])
     const [categories, setCategories] = useState([])
+    const [suppliers, setSuppliers] = useState([])
     const [inventoryReceipts, setInventoryReceipts] = useState([])
 
     const [categoriesLoading, setCategoriesLoading] = useState(false)
     const [sellerProductsLoading, setSellerProductsLoading] = useState(false)
+    const [suppliersLoading, setSuppliersLoading] = useState(false)
     const [inventoryReceiptsLoading, setInventoryReceiptsLoading] = useState(false)
 
     const [userData, setUserData] = useState(false)
     const [isSeller, setIsSeller] = useState(false)
     const [cartItems, setCartItems] = useState({})
     const isMountedRef = useRef(true)
+
+    useEffect(() => {
+        getTokenRef.current = getToken
+    }, [getToken])
 
     const fetchProductData = async () => {
         try {
@@ -82,7 +91,7 @@ export const AppContextProvider = (props) => {
     const fetchSellerProducts = useCallback(async ({ silent = false } = {}) => {
         try {
             setSellerProductsLoading(true)
-            const token = await getToken()
+            const token = await getTokenRef.current?.()
             if (!token) {
                 if (isMountedRef.current) {
                     setSellerProducts([])
@@ -124,12 +133,60 @@ export const AppContextProvider = (props) => {
                 setSellerProductsLoading(false)
             }
         }
-    }, [getToken])
+    }, [])
+
+    const fetchSuppliers = useCallback(async ({ silent = false, includeInactive = false } = {}) => {
+        try {
+            setSuppliersLoading(true)
+            const token = await getTokenRef.current?.()
+            if (!token) {
+                if (isMountedRef.current) {
+                    setSuppliers([])
+                }
+                return []
+            }
+
+            const { data } = await axios.get('/api/supplier/list', {
+                params: includeInactive ? { includeInactive: 'true' } : undefined,
+                headers: { Authorization: `Bearer ${token}` }
+            })
+
+            if (data.success) {
+                const normalizedSuppliers = (data.suppliers || [])
+                    .filter((supplier) => supplier?._id)
+                    .map((supplier) => ({
+                        ...supplier,
+                        _id: String(supplier._id),
+                        name: supplier?.name?.trim() || 'Nhà cung cấp'
+                    }))
+
+                if (isMountedRef.current) {
+                    setSuppliers(normalizedSuppliers)
+                }
+
+                return normalizedSuppliers
+            }
+
+            if (!silent) {
+                toast.error(data.message || 'Không thể tải danh sách nhà cung cấp')
+            }
+            return []
+        } catch (error) {
+            if (!silent) {
+                toast.error(error.response?.data?.message || error.message)
+            }
+            return []
+        } finally {
+            if (isMountedRef.current) {
+                setSuppliersLoading(false)
+            }
+        }
+    }, [])
 
     const fetchInventoryReceipts = useCallback(async ({ silent = false } = {}) => {
         try {
             setInventoryReceiptsLoading(true)
-            const token = await getToken()
+            const token = await getTokenRef.current?.()
             if (!token) {
                 if (isMountedRef.current) {
                     setInventoryReceipts([])
@@ -162,13 +219,13 @@ export const AppContextProvider = (props) => {
                 setInventoryReceiptsLoading(false)
             }
         }
-    }, [getToken])
+    }, [])
 
-    const fetchUserData = async () => {
+    const fetchUserData = async (role) => {
         try {
-            setIsSeller(user?.publicMetadata?.role === 'seller')
+            setIsSeller(role === 'seller')
 
-            const token = await getToken()
+            const token = await getTokenRef.current?.()
             if (!token) {
                 return
             }
@@ -191,7 +248,7 @@ export const AppContextProvider = (props) => {
         // sử dụng debounce tránh sapm click
         debounce(async (cartData, oldData) => {
             try {
-                const token = await getToken()
+                const token = await getTokenRef.current?.()
                     if (!token) return
                     await axios.post('/api/cart/update', { cartData }, {
                     headers: { Authorization: `Bearer ${token}` }
@@ -268,11 +325,12 @@ export const AppContextProvider = (props) => {
     }, [])
 
     useEffect(() => {
-        if (user) {
-            fetchUserData()
+        if (userId) {
+            fetchUserData(userRole)
 
-            if (user?.publicMetadata?.role === 'seller') {
+            if (userRole === 'seller') {
                 fetchSellerProducts({ silent: true })
+                fetchSuppliers({ silent: true })
                 fetchInventoryReceipts({ silent: true })
             }
 
@@ -283,8 +341,9 @@ export const AppContextProvider = (props) => {
         setUserData(false)
         setCartItems({})
         setSellerProducts([])
+        setSuppliers([])
         setInventoryReceipts([])
-    }, [user])
+    }, [userId, userRole, fetchSellerProducts, fetchSuppliers, fetchInventoryReceipts])
 
     const value = {
         user, getToken,
@@ -294,6 +353,7 @@ export const AppContextProvider = (props) => {
         products, fetchProductData,
         sellerProducts, fetchSellerProducts, sellerProductsLoading,
         categories, fetchCategories, categoriesLoading,
+        suppliers, fetchSuppliers, suppliersLoading,
         inventoryReceipts, fetchInventoryReceipts, inventoryReceiptsLoading,
         cartItems, setCartItems,
         addToCart, updateCartQuantity,

@@ -2,6 +2,7 @@ import connectDB from "@/config/db";
 import authSeller from "@/lib/authSeller";
 import InventoryReceipt from "@/models/InventoryReceipt";
 import Product from "@/models/Product";
+import Supplier from "@/models/Supplier";
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import z from "zod";
@@ -9,7 +10,7 @@ import z from "zod";
 const objectIdSchema = z.string().trim().regex(/^[a-f\d]{24}$/i, "ID không hợp lệ");
 
 const inventoryReceiptCreateSchema = z.object({
-  supplierName: z.string().trim().min(2, "Tên nhà cung cấp quá ngắn").max(120, "Tên nhà cung cấp quá dài"),
+  supplier: objectIdSchema,
   items: z.array(
     z.object({
       product: objectIdSchema,
@@ -56,7 +57,7 @@ export async function POST(req) {
       );
     }
 
-    const { supplierName, items, notes } = validation.data;
+    const { supplier, items, notes } = validation.data;
 
     const totalValue = items.reduce((sum, item) => sum + item.quantity * item.importPrice, 0);
     const productIds = [...new Set(items.map((item) => item.product))];
@@ -67,6 +68,21 @@ export async function POST(req) {
     if (products.length !== productIds.length) {
       return NextResponse.json(
         { success: false, message: "Một hoặc nhiều sản phẩm không tồn tại." },
+        { status: 400 }
+      );
+    }
+
+    const supplierDoc = await Supplier.findById(supplier).select("_id status").lean();
+    if (!supplierDoc) {
+      return NextResponse.json(
+        { success: false, message: "Nhà cung cấp không tồn tại." },
+        { status: 400 }
+      );
+    }
+
+    if (supplierDoc.status !== "active") {
+      return NextResponse.json(
+        { success: false, message: "Nhà cung cấp đang ở trạng thái ngưng hoạt động." },
         { status: 400 }
       );
     }
@@ -82,7 +98,7 @@ export async function POST(req) {
 
     const receipt = await InventoryReceipt.create({
       enteredBy: userId,
-      supplierName,
+      supplier,
       items,
       totalValue,
       notes

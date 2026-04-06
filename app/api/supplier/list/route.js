@@ -1,8 +1,10 @@
 import connectDB from "@/config/db";
 import authSeller from "@/lib/authSeller";
-import InventoryReceipt from "@/models/InventoryReceipt";
+import Supplier from "@/models/Supplier";
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+
+export const revalidate = 0;
 
 export async function GET(req) {
   try {
@@ -25,17 +27,29 @@ export async function GET(req) {
 
     await connectDB();
 
-    const receipts = await InventoryReceipt.find({})
-      .populate({ path: "supplier", select: "name phone email address taxCode status" })
-      .populate({ path: "items.product", select: "name image" })
-      .sort({ createdAt: -1 })
+    const { searchParams } = new URL(req.url);
+    const includeInactive = searchParams.get("includeInactive") === "true";
+    const status = searchParams.get("status");
+
+    let query = { status: "active" };
+    if (includeInactive || status === "all") {
+      query = {};
+    } else if (status === "inactive") {
+      query = { status: "inactive" };
+    }
+
+    const suppliers = await Supplier.find(
+      query,
+      { name: 1, phone: 1, email: 1, address: 1, taxCode: 1, status: 1, note: 1 }
+    )
+      .sort({ name: 1 })
       .lean();
 
-    return NextResponse.json({ success: true, receipts, count: receipts.length });
+    return NextResponse.json({ success: true, suppliers });
   } catch (error) {
-    console.error("Inventory receipt list error:", error);
+    console.error("Supplier list error:", error);
     return NextResponse.json(
-      { success: false, message: "Không thể tải danh sách phiếu nhập." },
+      { success: false, message: "Không thể tải danh sách nhà cung cấp." },
       { status: 500 }
     );
   }
