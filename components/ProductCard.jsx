@@ -84,9 +84,11 @@ const ProductCard = ({ product }) => {
 
             <div className="flex items-end justify-between w-full mt-1">
                 <p className="text-base font-medium">{formatVnd(product.offerPrice)} {currency}</p>
-                <span className={`text-[11px] px-2 py-0.5 rounded-full ${isOutOfStock ? 'bg-red-100 text-red-600' : isLowStock ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
-                    {isOutOfStock ? 'Hết hàng' : isLowStock ? 'Sắp hết' : 'Còn hàng'}
-                </span>
+                {(isOutOfStock || isLowStock) && (
+                    <span className={`text-[11px] px-2 py-0.5 rounded-full ${isOutOfStock ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-700'}`}>
+                        {isOutOfStock ? 'Hết hàng' : 'Sắp hết'}
+                    </span>
+                )}
                 {/* <button className=" max-sm:hidden px-4 py-1.5 text-gray-500 border border-gray-500/20 rounded-full text-xs hover:bg-slate-50 transition">
                     Mua ngay
                 </button> */}

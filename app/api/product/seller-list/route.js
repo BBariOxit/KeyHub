@@ -18,22 +18,42 @@ export async function GET(req) {
 
     await connectDB()
 
-    const hasMultiCategorySchema = Boolean(Product.schema.path('categoryIds'))
-    const categoryProjection = hasMultiCategorySchema ? { categoryIds: 1 } : { categoryId: 1 }
-    const populatePath = hasMultiCategorySchema ? 'categoryIds' : 'categoryId'
+    const hasCategoryIdsPath = Boolean(Product.schema.path('categoryIds'))
+    const hasCategoryIdPath = Boolean(Product.schema.path('categoryId'))
 
-    const productsRaw = await Product.find(
-      {},
-      { name: 1, image: 1, ...categoryProjection, category: 1, offerPrice: 1, stock: 1 }
-    )
-      .populate({ path: populatePath, select: 'name slug' })
-      .sort({ date: -1 })
-      .lean()
+    const projection = {
+      name: 1,
+      image: 1,
+      category: 1,
+      offerPrice: 1,
+      stock: 1
+    }
+
+    if (hasCategoryIdsPath) {
+      projection.categoryIds = 1
+    }
+
+    if (hasCategoryIdPath) {
+      projection.categoryId = 1
+    }
+
+    let query = Product.find(
+      { userId },
+      projection
+    ).sort({ date: -1 })
+
+    if (hasCategoryIdsPath) {
+      query = query.populate({ path: 'categoryIds', select: 'name slug' })
+    } else if (hasCategoryIdPath) {
+      query = query.populate({ path: 'categoryId', select: 'name slug' })
+    }
+
+    const productsRaw = await query.lean()
 
     const products = productsRaw.map((product) => {
-      const populatedCategoryDocs = hasMultiCategorySchema
+      const populatedCategoryDocs = hasCategoryIdsPath
         ? (Array.isArray(product?.categoryIds) ? product.categoryIds : [])
-        : (product?.categoryId ? [product.categoryId] : [])
+        : (hasCategoryIdPath && product?.categoryId ? [product.categoryId] : [])
 
       const populatedCategoryNames = populatedCategoryDocs
         .map((item) => item?.name)
