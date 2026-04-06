@@ -10,13 +10,12 @@ import Link from "next/link";
 
 const AddProduct = () => {
 
-  const { getToken, fetchProductData } = useAppContext()
+  const { getToken, fetchProductData, categories, fetchCategories, categoriesLoading } = useAppContext()
 
   const [files, setFiles] = useState([]);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [categoryId, setCategoryId] = useState('');
-  const [categories, setCategories] = useState([]);
   const [price, setPrice] = useState('');
   const [offerPrice, setOfferPrice] = useState('');
   const [stock, setStock] = useState('0');
@@ -39,24 +38,16 @@ const AddProduct = () => {
   }, [files]);
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const { data } = await axios.get('/api/category/list')
-        if (data.success) {
-          setCategories(data.categories || [])
-          if (data.categories?.length > 0) {
-            setCategoryId((prev) => prev || data.categories[0]._id)
-          }
-        } else {
-          toast.error(data.message || 'Không thể tải danh mục')
-        }
-      } catch (error) {
-        toast.error(error.response?.data?.message || error.message)
-      }
+    if (categories.length === 0) {
+      fetchCategories({ silent: false })
     }
+  }, [categories.length, fetchCategories])
 
-    fetchCategories()
-  }, [])
+  useEffect(() => {
+    if (categories.length > 0) {
+      setCategoryId((prev) => prev || categories[0]._id)
+    }
+  }, [categories])
 
   const clearError = (fieldName) => {
     setFieldErrors((prev) => {
@@ -208,9 +199,10 @@ const AddProduct = () => {
                 clearError('categoryId')
               }}
               value={categoryId}
-              disabled={categories.length === 0}
+              disabled={categories.length === 0 || categoriesLoading}
             >
-              {categories.length === 0 && <option value="">Chưa có danh mục</option>}
+              {categoriesLoading && <option value="">Đang tải danh mục...</option>}
+              {!categoriesLoading && categories.length === 0 && <option value="">Chưa có danh mục</option>}
               {categories.map((item) => (
                 <option key={item._id} value={item._id}>{item.name}</option>
               ))}

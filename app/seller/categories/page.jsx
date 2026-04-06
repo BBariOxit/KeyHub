@@ -3,21 +3,25 @@ import Footer from "@/components/seller/Footer";
 import Loading from "@/components/Loading";
 import { useAppContext } from "@/context/AppContext";
 import axios from "axios";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import z from "zod";
 
 const categorySchema = z.object({
   name: z.string().trim().min(2, "Tên danh mục quá ngắn").max(80, "Tên danh mục quá dài"),
-  slug: z.string().trim().min(2, "Slug quá ngắn").max(120, "Slug quá dài").optional().or(z.literal("")),
-  description: z.string().trim().max(500, "Mô tả quá dài").optional().or(z.literal(""))
+  slug: z.preprocess(
+    (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+    z.string().trim().min(2, "Slug quá ngắn").max(120, "Slug quá dài").optional()
+  ),
+  description: z.preprocess(
+    (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+    z.string().trim().max(500, "Mô tả quá dài").optional()
+  )
 });
 
 const CategoriesPage = () => {
-  const { getToken, user } = useAppContext();
+  const { getToken, user, categories, fetchCategories, categoriesLoading } = useAppContext();
 
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
   const [name, setName] = useState("");
@@ -25,30 +29,17 @@ const CategoriesPage = () => {
   const [description, setDescription] = useState("");
   const [errors, setErrors] = useState({});
 
-  const fetchCategories = useCallback(async () => {
-    try {
-      const { data } = await axios.get('/api/category/list');
-      if (data.success) {
-        setCategories(data.categories || []);
-      } else {
-        toast.error(data.message || 'Không thể tải danh mục');
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.message || error.message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
+    if (categories.length === 0) {
+      fetchCategories({ silent: false });
+    }
+  }, [categories.length, fetchCategories]);
 
   const formPreview = useMemo(() => {
     return {
       name: name.trim(),
-      slug: slug.trim(),
-      description: description.trim()
+      slug,
+      description
     };
   }, [name, slug, description]);
 
@@ -90,7 +81,7 @@ const CategoriesPage = () => {
         setName('');
         setSlug('');
         setDescription('');
-        await fetchCategories();
+        await fetchCategories({ silent: false });
       } else {
         if (Array.isArray(data.errors)) {
           const nextErrors = {};
@@ -122,7 +113,7 @@ const CategoriesPage = () => {
 
   return (
     <div className="flex-1 min-h-screen flex flex-col justify-between bg-gradient-to-b from-orange-50/40 via-white to-white">
-      {loading ? (
+      {categoriesLoading && categories.length === 0 ? (
         <Loading />
       ) : (
         <div className="w-full md:p-10 p-4 space-y-6">

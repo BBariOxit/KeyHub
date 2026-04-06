@@ -23,6 +23,14 @@ export const AppContextProvider = (props) => {
     const { getToken } = useAuth()
 
     const [products, setProducts] = useState([])
+    const [sellerProducts, setSellerProducts] = useState([])
+    const [categories, setCategories] = useState([])
+    const [inventoryReceipts, setInventoryReceipts] = useState([])
+
+    const [categoriesLoading, setCategoriesLoading] = useState(false)
+    const [sellerProductsLoading, setSellerProductsLoading] = useState(false)
+    const [inventoryReceiptsLoading, setInventoryReceiptsLoading] = useState(false)
+
     const [userData, setUserData] = useState(false)
     const [isSeller, setIsSeller] = useState(false)
     const [cartItems, setCartItems] = useState({})
@@ -42,6 +50,119 @@ export const AppContextProvider = (props) => {
             toast.error(error.message)
         }
     }
+
+    const fetchCategories = useCallback(async ({ silent = false } = {}) => {
+        try {
+            setCategoriesLoading(true)
+            const { data } = await axios.get('/api/category/list')
+
+            if (data.success) {
+                if (isMountedRef.current) {
+                    setCategories(data.categories || [])
+                }
+                return data.categories || []
+            }
+
+            if (!silent) {
+                toast.error(data.message || 'Không thể tải danh mục')
+            }
+            return []
+        } catch (error) {
+            if (!silent) {
+                toast.error(error.response?.data?.message || error.message)
+            }
+            return []
+        } finally {
+            if (isMountedRef.current) {
+                setCategoriesLoading(false)
+            }
+        }
+    }, [])
+
+    const fetchSellerProducts = useCallback(async ({ silent = false } = {}) => {
+        try {
+            setSellerProductsLoading(true)
+            const token = await getToken()
+            if (!token) {
+                if (isMountedRef.current) {
+                    setSellerProducts([])
+                }
+                return []
+            }
+
+            const { data } = await axios.get('/api/product/seller-list', {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+
+            if (data.success) {
+                const normalizedProducts = (data.products || [])
+                    .filter((product) => product?._id)
+                    .map((product) => ({
+                        ...product,
+                        _id: String(product._id),
+                        name: product?.name?.trim() || 'Sản phẩm chưa đặt tên'
+                    }))
+
+                if (isMountedRef.current) {
+                    setSellerProducts(normalizedProducts)
+                }
+
+                return normalizedProducts
+            }
+
+            if (!silent) {
+                toast.error(data.message || 'Không thể tải danh sách sản phẩm')
+            }
+            return []
+        } catch (error) {
+            if (!silent) {
+                toast.error(error.response?.data?.message || error.message)
+            }
+            return []
+        } finally {
+            if (isMountedRef.current) {
+                setSellerProductsLoading(false)
+            }
+        }
+    }, [getToken])
+
+    const fetchInventoryReceipts = useCallback(async ({ silent = false } = {}) => {
+        try {
+            setInventoryReceiptsLoading(true)
+            const token = await getToken()
+            if (!token) {
+                if (isMountedRef.current) {
+                    setInventoryReceipts([])
+                }
+                return []
+            }
+
+            const { data } = await axios.get('/api/inventory-receipt/list', {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+
+            if (data.success) {
+                if (isMountedRef.current) {
+                    setInventoryReceipts(data.receipts || [])
+                }
+                return data.receipts || []
+            }
+
+            if (!silent) {
+                toast.error(data.message || 'Không thể tải danh sách phiếu nhập')
+            }
+            return []
+        } catch (error) {
+            if (!silent) {
+                toast.error(error.response?.data?.message || error.message)
+            }
+            return []
+        } finally {
+            if (isMountedRef.current) {
+                setInventoryReceiptsLoading(false)
+            }
+        }
+    }, [getToken])
 
     const fetchUserData = async () => {
         try {
@@ -143,17 +264,26 @@ export const AppContextProvider = (props) => {
 
     useEffect(() => {
         fetchProductData()
+        fetchCategories({ silent: true })
     }, [])
 
     useEffect(() => {
         if (user) {
             fetchUserData()
+
+            if (user?.publicMetadata?.role === 'seller') {
+                fetchSellerProducts({ silent: true })
+                fetchInventoryReceipts({ silent: true })
+            }
+
             return
         }
 
         setIsSeller(false)
         setUserData(false)
         setCartItems({})
+        setSellerProducts([])
+        setInventoryReceipts([])
     }, [user])
 
     const value = {
@@ -162,6 +292,9 @@ export const AppContextProvider = (props) => {
         isSeller, setIsSeller,
         userData, fetchUserData,
         products, fetchProductData,
+        sellerProducts, fetchSellerProducts, sellerProductsLoading,
+        categories, fetchCategories, categoriesLoading,
+        inventoryReceipts, fetchInventoryReceipts, inventoryReceiptsLoading,
         cartItems, setCartItems,
         addToCart, updateCartQuantity,
         getCartCount, getCartAmount

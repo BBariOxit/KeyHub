@@ -7,8 +7,14 @@ import z from "zod";
 
 const categoryCreateSchema = z.object({
   name: z.string().trim().min(2, "Tên danh mục quá ngắn").max(80, "Tên danh mục quá dài"),
-  slug: z.string().trim().min(2, "Slug quá ngắn").max(120, "Slug quá dài").optional(),
-  description: z.string().trim().max(500, "Mô tả quá dài").optional().default("")
+  slug: z.preprocess(
+    (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+    z.string().trim().min(2, "Slug quá ngắn").max(120, "Slug quá dài").optional()
+  ),
+  description: z.preprocess(
+    (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+    z.string().trim().max(500, "Mô tả quá dài").optional()
+  )
 });
 
 const slugify = (value) =>
@@ -83,7 +89,7 @@ export async function POST(req) {
     const category = await Category.create({
       name,
       slug: generatedSlug,
-      description
+      description: description || ""
     });
 
     return NextResponse.json({ success: true, category });

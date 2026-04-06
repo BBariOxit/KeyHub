@@ -4,7 +4,7 @@ import Loading from "@/components/Loading";
 import { useAppContext } from "@/context/AppContext";
 import { formatThousandsInput, formatVnd, getNumericString } from "@/lib/price";
 import axios from "axios";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import z from "zod";
 
@@ -29,64 +29,41 @@ const createEmptyItem = () => ({
 });
 
 const InventoryPage = () => {
-  const { getToken, user, fetchProductData } = useAppContext();
+  const {
+    getToken,
+    user,
+    fetchProductData,
+    sellerProducts,
+    fetchSellerProducts,
+    sellerProductsLoading,
+    inventoryReceipts,
+    fetchInventoryReceipts,
+    inventoryReceiptsLoading
+  } = useAppContext();
 
-  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-
-  const [products, setProducts] = useState([]);
-  const [receipts, setReceipts] = useState([]);
 
   const [supplierName, setSupplierName] = useState('');
   const [notes, setNotes] = useState('');
   const [items, setItems] = useState([createEmptyItem()]);
   const [errors, setErrors] = useState({});
 
-  const fetchData = useCallback(async () => {
-    try {
-      const token = await getToken();
-      const [productsRes, receiptsRes] = await Promise.all([
-        axios.get('/api/product/seller-list', { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get('/api/inventory-receipt/list', { headers: { Authorization: `Bearer ${token}` } })
-      ]);
-
-      if (productsRes.data.success) {
-        const normalizedProducts = (productsRes.data.products || [])
-          .filter((product) => product?._id)
-          .map((product) => ({
-            ...product,
-            _id: String(product._id),
-            name: product?.name?.trim() || 'Sản phẩm chưa đặt tên'
-          }));
-
-        setProducts(normalizedProducts);
-      } else {
-        toast.error(productsRes.data.message || 'Không thể tải danh sách sản phẩm');
-      }
-
-      if (receiptsRes.data.success) {
-        setReceipts(receiptsRes.data.receipts || []);
-      } else {
-        toast.error(receiptsRes.data.message || 'Không thể tải danh sách phiếu nhập');
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.message || error.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [getToken]);
-
   useEffect(() => {
     if (user) {
-      fetchData();
+      fetchSellerProducts({ silent: false });
+      fetchInventoryReceipts({ silent: false });
     }
-  }, [user, fetchData]);
+  }, [user, fetchSellerProducts, fetchInventoryReceipts]);
 
   useEffect(() => {
-    if (products.length > 0) {
-      setItems((prev) => prev.map((item) => ({ ...item, product: item.product || products[0]._id })));
+    if (sellerProducts.length > 0) {
+      setItems((prev) => prev.map((item) => ({ ...item, product: item.product || sellerProducts[0]._id })));
     }
-  }, [products]);
+  }, [sellerProducts]);
+
+  const products = sellerProducts;
+  const receipts = inventoryReceipts;
+  const loading = sellerProductsLoading || inventoryReceiptsLoading;
 
   const totalValue = useMemo(() => {
     return items.reduce((sum, item) => {
@@ -167,8 +144,11 @@ const InventoryPage = () => {
         setNotes('');
         setItems([{ ...createEmptyItem(), product: products[0]?._id || '' }]);
         setErrors({});
-        await fetchData();
-        await fetchProductData();
+        await Promise.all([
+          fetchSellerProducts({ silent: false }),
+          fetchInventoryReceipts({ silent: false }),
+          fetchProductData()
+        ]);
       } else {
         if (Array.isArray(data.errors)) {
           const nextErrors = {};
