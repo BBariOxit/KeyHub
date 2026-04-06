@@ -10,6 +10,7 @@ const SideBar = () => {
         { name: 'Thêm sản phẩm', path: '/seller', icon: assets.add_icon },
         { name: 'Danh sách sản phẩm', path: '/seller/product-list', icon: assets.product_list_icon },
         { name: 'Danh mục', path: '/seller/categories', icon: assets.product_list_icon },
+        { name: 'Nhà cung cấp', path: '/seller/suppliers', icon: assets.product_list_icon },
         { name: 'Nhập kho', path: '/seller/inventory', icon: assets.box_icon },
         { name: 'Đơn hàng', path: '/seller/orders', icon: assets.order_icon },
     ];

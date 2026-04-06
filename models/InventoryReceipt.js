@@ -24,10 +24,10 @@ const inventoryReceiptSchema = new mongoose.Schema({
     ref: "user",
     required: true
   },
-  supplierName: {
-    type: String,
+  supplier: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Supplier",
     required: true,
-    trim: true
   },
   items: {
     type: [inventoryReceiptItemSchema],

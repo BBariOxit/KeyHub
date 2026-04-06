@@ -8,10 +8,10 @@ import React, { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import z from "zod";
 
-const objectIdSchema = z.string().trim().regex(/^[a-f\d]{24}$/i, "Sản phẩm không hợp lệ");
+const objectIdSchema = z.string().trim().regex(/^[a-f\d]{24}$/i, "ID không hợp lệ");
 
 const receiptSchema = z.object({
-  supplierName: z.string().trim().min(2, "Tên nhà cung cấp quá ngắn").max(120, "Tên nhà cung cấp quá dài"),
+  supplier: objectIdSchema,
   items: z.array(
     z.object({
       product: objectIdSchema,
@@ -36,6 +36,9 @@ const InventoryPage = () => {
     sellerProducts,
     fetchSellerProducts,
     sellerProductsLoading,
+    suppliers,
+    fetchSuppliers,
+    suppliersLoading,
     inventoryReceipts,
     fetchInventoryReceipts,
     inventoryReceiptsLoading
@@ -43,17 +46,18 @@ const InventoryPage = () => {
 
   const [submitting, setSubmitting] = useState(false);
 
-  const [supplierName, setSupplierName] = useState('');
+  const [supplier, setSupplier] = useState('');
   const [notes, setNotes] = useState('');
   const [items, setItems] = useState([createEmptyItem()]);
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    if (user) {
+    if (user?.id) {
       fetchSellerProducts({ silent: false });
+      fetchSuppliers({ silent: false });
       fetchInventoryReceipts({ silent: false });
     }
-  }, [user, fetchSellerProducts, fetchInventoryReceipts]);
+  }, [user?.id, fetchSellerProducts, fetchSuppliers, fetchInventoryReceipts]);
 
   useEffect(() => {
     if (sellerProducts.length > 0) {
@@ -61,9 +65,16 @@ const InventoryPage = () => {
     }
   }, [sellerProducts]);
 
+  useEffect(() => {
+    if (!supplier && suppliers.length > 0) {
+      setSupplier(suppliers[0]._id);
+    }
+  }, [supplier, suppliers]);
+
   const products = sellerProducts;
+  const supplierOptions = suppliers;
   const receipts = inventoryReceipts;
-  const loading = sellerProductsLoading || inventoryReceiptsLoading;
+  const loading = sellerProductsLoading || suppliersLoading || inventoryReceiptsLoading;
 
   const totalValue = useMemo(() => {
     return items.reduce((sum, item) => {
@@ -109,7 +120,7 @@ const InventoryPage = () => {
     setErrors({});
 
     const payload = {
-      supplierName,
+      supplier,
       notes,
       items: items.map((item) => ({
         product: item.product,
@@ -140,12 +151,13 @@ const InventoryPage = () => {
 
       if (data.success) {
         toast.success('Tạo phiếu nhập thành công');
-        setSupplierName('');
+        setSupplier(supplierOptions[0]?._id || '');
         setNotes('');
         setItems([{ ...createEmptyItem(), product: products[0]?._id || '' }]);
         setErrors({});
         await Promise.all([
           fetchSellerProducts({ silent: false }),
+          fetchSuppliers({ silent: true }),
           fetchInventoryReceipts({ silent: false }),
           fetchProductData()
         ]);
@@ -196,16 +208,26 @@ const InventoryPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="text-sm font-medium text-gray-700">Nhà cung cấp</label>
-                  <input
+                  <select
                     className="w-full outline-none px-3 py-2.5 rounded-lg border border-gray-300 focus:border-orange-400"
-                    value={supplierName}
+                    value={supplier}
                     onChange={(e) => {
-                      setSupplierName(e.target.value);
-                      clearError('supplierName');
+                      setSupplier(e.target.value);
+                      clearError('supplier');
                     }}
-                    placeholder="Ví dụ: Công ty ABC"
-                  />
-                  {errors.supplierName && <p className="text-xs text-red-500">{errors.supplierName}</p>}
+                    disabled={supplierOptions.length === 0}
+                  >
+                    {supplierOptions.length === 0 && <option value="">Chưa có nhà cung cấp</option>}
+                    {supplierOptions.map((item) => (
+                      <option key={item._id} value={item._id}>
+                        {item.name}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.supplier && <p className="text-xs text-red-500">{errors.supplier}</p>}
+                  {supplierOptions.length === 0 && (
+                    <p className="text-xs text-amber-600">Chưa có nhà cung cấp nào đang hoạt động. Vui lòng tạo nhà cung cấp trước.</p>
+                  )}
                 </div>
                 <div className="space-y-1">
                   <label className="text-sm font-medium text-gray-700">Tổng giá trị tạm tính</label>
@@ -335,7 +357,7 @@ const InventoryPage = () => {
               </div>
 
               <button
-                disabled={submitting || products.length === 0}
+                disabled={submitting || products.length === 0 || supplierOptions.length === 0}
                 className={`w-full py-2.5 rounded-lg text-white font-medium transition ${submitting ? 'bg-orange-400 cursor-not-allowed' : 'bg-orange-600 hover:bg-orange-700'}`}
               >
                 {submitting ? 'Đang lưu phiếu...' : 'Lưu phiếu nhập'}
@@ -353,7 +375,7 @@ const InventoryPage = () => {
                 {receipts.map((receipt) => (
                   <div key={receipt._id} className="rounded-xl border border-gray-200 p-4 space-y-2 hover:border-orange-200 transition">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="font-semibold text-gray-800 truncate">{receipt.supplierName}</p>
+                      <p className="font-semibold text-gray-800 truncate">{receipt.supplier?.name || 'Nhà cung cấp'}</p>
                       <span className="text-xs text-gray-500">{new Date(receipt.createdAt).toLocaleDateString('vi-VN')}</span>
                     </div>
                     <p className="text-sm text-gray-600">
