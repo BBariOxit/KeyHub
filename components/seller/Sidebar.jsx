@@ -1,18 +1,17 @@
 import React from 'react';
 import Link from 'next/link';
-import { assets } from '../../assets/assets';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import { PlusCircle, List, Tags, Users, Boxes, ShoppingCart } from 'lucide-react';
 
 const SideBar = () => {
     const pathname = usePathname()
     const menuItems = [
-        { name: 'Thêm sản phẩm', path: '/seller', icon: assets.add_icon },
-        { name: 'Danh sách sản phẩm', path: '/seller/product-list', icon: assets.product_list_icon },
-        { name: 'Danh mục', path: '/seller/categories', icon: assets.product_list_icon },
-        { name: 'Nhà cung cấp', path: '/seller/suppliers', icon: assets.product_list_icon },
-        { name: 'Nhập kho', path: '/seller/inventory', icon: assets.box_icon },
-        { name: 'Đơn hàng', path: '/seller/orders', icon: assets.order_icon },
+        { name: 'Thêm sản phẩm', path: '/seller', icon: PlusCircle },
+        { name: 'Danh sách sản phẩm', path: '/seller/product-list', icon: List },
+        { name: 'Danh mục', path: '/seller/categories', icon: Tags },
+        { name: 'Nhà cung cấp', path: '/seller/suppliers', icon: Users },
+        { name: 'Nhập kho', path: '/seller/inventory', icon: Boxes },
+        { name: 'Đơn hàng', path: '/seller/orders', icon: ShoppingCart },
     ];
 
     return (
@@ -31,11 +30,7 @@ const SideBar = () => {
                                 }`
                             }
                         >
-                            <Image
-                                src={item.icon}
-                                alt={`${item.name.toLowerCase()}_icon`}
-                                className="w-7 h-7"
-                            />
+                            <item.icon className="w-6 h-6" strokeWidth={2} />
                             <p className='md:block hidden text-center'>{item.name}</p>
                         </div>
                     </Link>

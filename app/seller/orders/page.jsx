@@ -1,13 +1,12 @@
 'use client';
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { assets } from "@/assets/assets";
-import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
 import Footer from "@/components/seller/Footer";
 import Loading from "@/components/Loading";
 import { formatVnd } from "@/lib/price";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { Package } from "lucide-react";
 
 const Orders = () => {
 
@@ -66,11 +65,9 @@ const Orders = () => {
                     {orders.map((order, index) => (
                             <div key={order._id || index} className="grid grid-cols-1 md:grid-cols-[2.3fr_1.45fr_1.15fr_1.45fr] gap-5 md:gap-x-7 md:gap-y-6 p-6 border border-gray-200 rounded-2xl md:items-center bg-white shadow-sm hover:shadow-md transition-shadow">
                                 <div className="flex items-center gap-5 md:gap-6 min-w-0">
-                                <Image
-                                        className="w-16 h-16 object-cover shrink-0 bg-orange-50 border border-orange-200 rounded-xl p-2"
-                                    src={assets.box_icon}
-                                    alt="box_icon"
-                                />
+                                    <div className="w-16 h-16 shrink-0 bg-orange-50 border border-orange-200 rounded-xl p-2 flex items-center justify-center">
+                                        <Package className="w-8 h-8 text-orange-500" strokeWidth={2} />
+                                    </div>
                                 <p className="flex flex-col gap-2 min-w-0 leading-7">
                                         <span className="text-xs font-semibold text-gray-500 md:hidden uppercase">Sản phẩm</span>
                                     <span className="font-medium text-base break-words">
