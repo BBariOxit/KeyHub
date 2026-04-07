@@ -1,8 +1,11 @@
 import { useAppContext } from "@/context/AppContext";
 import { formatVnd } from "@/lib/price";
 import axios from "axios";
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import toast from "react-hot-toast";
+
+const CHECKOUT_IDEMPOTENCY_STORAGE_KEY = 'checkout-idempotency-key'
+const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 const OrderSummary = () => {
 
@@ -10,12 +13,47 @@ const OrderSummary = () => {
   const [selectedAddress, setSelectedAddress] = useState(null)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  const idempotencyKeyRef = useRef('')
 
   const [userAddresses, setUserAddresses] = useState([])
   const subtotal = useMemo(() => getCartAmount(), [getCartAmount])
   const itemsCount = useMemo(() => getCartCount(), [getCartCount])
   const taxAmount = useMemo(() => Math.floor(subtotal * 0.02), [subtotal])
   const totalAmount = useMemo(() => subtotal + taxAmount, [subtotal, taxAmount])
+
+  const resetCheckoutIdempotencyKey = useCallback(() => {
+    idempotencyKeyRef.current = ''
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.removeItem(CHECKOUT_IDEMPOTENCY_STORAGE_KEY)
+    }
+  }, [])
+
+  const getOrCreateCheckoutIdempotencyKey = useCallback(() => {
+    if (idempotencyKeyRef.current) {
+      return idempotencyKeyRef.current
+    }
+
+    if (typeof crypto === 'undefined' || typeof crypto.randomUUID !== 'function') {
+      throw new Error('Trình duyệt không hỗ trợ crypto.randomUUID')
+    }
+
+    if (typeof window !== 'undefined') {
+      const existing = window.sessionStorage.getItem(CHECKOUT_IDEMPOTENCY_STORAGE_KEY)
+      if (existing && uuidV4Regex.test(existing)) {
+        idempotencyKeyRef.current = existing
+        return existing
+      }
+    }
+
+    const generated = crypto.randomUUID()
+    idempotencyKeyRef.current = generated
+
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.setItem(CHECKOUT_IDEMPOTENCY_STORAGE_KEY, generated)
+    }
+
+    return generated
+  }, [])
 
   const fetchUserAddresses = useCallback(async () => {
     try {
@@ -39,6 +77,7 @@ const OrderSummary = () => {
   const handleAddressSelect = (address) => {
     setSelectedAddress(address);
     setIsDropdownOpen(false);
+    resetCheckoutIdempotencyKey()
   };
 
   const createOrder = async () => {
@@ -64,25 +103,36 @@ const OrderSummary = () => {
         return toast.error("Vui lòng đăng nhập để đặt hàng")
       }
 
+      const idempotencyKey = getOrCreateCheckoutIdempotencyKey()
+
       const { data } = await axios.post('/api/order/create', {
         address: selectedAddress._id,
         items: cartItemsArray
       }, {
-        headers: {Authorization: `Bearer ${token}`}
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'x-idempotency-key': idempotencyKey
+        }
       })
 
       if (data.success) {
         toast.success(data.message || 'Đặt hàng thành công!')
         setCartItems({})
+        resetCheckoutIdempotencyKey()
         await fetchProductData()
         router.push('/order-placed')
       } else {
         toast.error(data.message || 'Có lỗi xảy ra khi đặt hàng')
+        resetCheckoutIdempotencyKey()
       }
 
     } catch (error) {
       const msg = error.response?.data?.message || error.message || 'Lỗi kết nối server';
       toast.error(msg)
+      const errorStatus = error.response?.status
+      if (errorStatus && errorStatus < 500) {
+        resetCheckoutIdempotencyKey()
+      }
     } finally {
       setLoading(false)
     }

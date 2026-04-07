@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import "@/models/Category";
 
 const productSchema = new mongoose.Schema({
   userId: { type: String, required: true, ref: 'user' },
