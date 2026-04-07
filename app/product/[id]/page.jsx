@@ -13,6 +13,8 @@ import React from "react";
 import { formatVnd } from "@/lib/price";
 import { optimizeCloudinaryImage } from "@/lib/image";
 
+const CHECKOUT_IDEMPOTENCY_STORAGE_KEY = 'checkout-idempotency-key'
+
 const Product = () => {
 
     const { id } = useParams();
@@ -144,6 +146,9 @@ const Product = () => {
                         </button>
                         <button
                             onClick={async () => {
+                                if (typeof window !== 'undefined' && typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+                                    window.sessionStorage.setItem(CHECKOUT_IDEMPOTENCY_STORAGE_KEY, crypto.randomUUID())
+                                }
                                 const added = await addToCart(productData._id)
                                 if (added) {
                                     router.push('/cart')

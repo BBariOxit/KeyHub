@@ -4,7 +4,7 @@ import Loading from "@/components/Loading";
 import { useAppContext } from "@/context/AppContext";
 import { formatThousandsInput, formatVnd, getNumericString } from "@/lib/price";
 import axios from "axios";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import z from "zod";
 
@@ -45,11 +45,31 @@ const InventoryPage = () => {
   } = useAppContext();
 
   const [submitting, setSubmitting] = useState(false);
+  const idempotencyKeyRef = useRef('');
 
   const [supplier, setSupplier] = useState('');
   const [notes, setNotes] = useState('');
   const [items, setItems] = useState([createEmptyItem()]);
   const [errors, setErrors] = useState({});
+
+  const resetIdempotencyKey = () => {
+    idempotencyKeyRef.current = '';
+  };
+
+  const getOrCreateIdempotencyKey = () => {
+    if (idempotencyKeyRef.current) {
+      return idempotencyKeyRef.current;
+    }
+
+    if (typeof crypto === 'undefined' || typeof crypto.randomUUID !== 'function') {
+      throw new Error('Trình duyệt không hỗ trợ crypto.randomUUID');
+    }
+
+    const generated = crypto.randomUUID();
+
+    idempotencyKeyRef.current = generated;
+    return generated;
+  };
 
   useEffect(() => {
     if (user?.id) {
@@ -95,6 +115,7 @@ const InventoryPage = () => {
 
   const updateItem = (index, key, value) => {
     setItems((prev) => prev.map((item, i) => i === index ? { ...item, [key]: value } : item));
+    resetIdempotencyKey();
     clearError(`items.${index}.${key}`);
     clearError('items');
   };
@@ -109,14 +130,19 @@ const InventoryPage = () => {
       ...createEmptyItem(),
       product: products[0]?._id || ''
     }]);
+    resetIdempotencyKey();
   };
 
   const removeItem = (index) => {
     setItems((prev) => prev.filter((_, i) => i !== index));
+    resetIdempotencyKey();
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitting) {
+      return;
+    }
     setErrors({});
 
     const payload = {
@@ -145,16 +171,21 @@ const InventoryPage = () => {
     try {
       setSubmitting(true);
       const token = await getToken();
+      const idempotencyKey = getOrCreateIdempotencyKey();
       const { data } = await axios.post('/api/inventory-receipt/create', validation.data, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'x-idempotency-key': idempotencyKey
+        }
       });
 
       if (data.success) {
-        toast.success('Tạo phiếu nhập thành công');
+        toast.success(data.idempotentReplay ? 'Yêu cầu đã được xử lý trước đó' : 'Tạo phiếu nhập thành công');
         setSupplier(supplierOptions[0]?._id || '');
         setNotes('');
         setItems([{ ...createEmptyItem(), product: products[0]?._id || '' }]);
         setErrors({});
+        resetIdempotencyKey();
         await Promise.all([
           fetchSellerProducts({ silent: false }),
           fetchSuppliers({ silent: true }),
@@ -172,6 +203,7 @@ const InventoryPage = () => {
           setErrors(nextErrors);
         }
         toast.error(data.message || 'Không thể tạo phiếu nhập');
+        resetIdempotencyKey();
       }
     } catch (error) {
       const apiErrors = error.response?.data?.errors;
@@ -185,6 +217,10 @@ const InventoryPage = () => {
         setErrors(nextErrors);
       }
       toast.error(error.response?.data?.message || error.message);
+      const errorStatus = error.response?.status;
+      if (errorStatus && errorStatus < 500) {
+        resetIdempotencyKey();
+      }
     } finally {
       setSubmitting(false);
     }
@@ -213,6 +249,7 @@ const InventoryPage = () => {
                     value={supplier}
                     onChange={(e) => {
                       setSupplier(e.target.value);
+                      resetIdempotencyKey();
                       clearError('supplier');
                     }}
                     disabled={supplierOptions.length === 0}
@@ -349,6 +386,7 @@ const InventoryPage = () => {
                   value={notes}
                   onChange={(e) => {
                     setNotes(e.target.value);
+                    resetIdempotencyKey();
                     clearError('notes');
                   }}
                   placeholder="Ghi chú thêm nếu cần"

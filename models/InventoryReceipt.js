@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import "@/models/Product";
+import "@/models/Supplier";
 
 const inventoryReceiptItemSchema = new mongoose.Schema({
   product: {
@@ -23,6 +25,12 @@ const inventoryReceiptSchema = new mongoose.Schema({
     type: String,
     ref: "user",
     required: true
+  },
+  idempotencyKey: {
+    type: String,
+    trim: true,
+    maxlength: 128,
+    default: null
   },
   supplier: {
     type: mongoose.Schema.Types.ObjectId,
@@ -49,6 +57,16 @@ const inventoryReceiptSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
+
+inventoryReceiptSchema.index(
+  { enteredBy: 1, idempotencyKey: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      idempotencyKey: { $type: "string" }
+    }
+  }
+);
 
 const InventoryReceipt = mongoose.models.inventoryReceipt || mongoose.model("inventoryReceipt", inventoryReceiptSchema);
 
