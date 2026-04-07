@@ -1,7 +1,5 @@
 'use client';
 import React, { useCallback, useEffect, useState } from "react";
-import { assets } from "@/assets/assets";
-import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
@@ -9,6 +7,7 @@ import Loading from "@/components/Loading";
 import { formatVnd } from "@/lib/price";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { Package } from "lucide-react";
 
 const MyOrders = () => {
 
@@ -52,11 +51,9 @@ const MyOrders = () => {
                         {orders.map((order, index) => (
                             <div key={order._id || index} className="grid grid-cols-1 items-start gap-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5 lg:grid-cols-12 lg:items-center lg:gap-6">
                                 <div className="flex min-w-0 items-center gap-4 lg:col-span-4">
-                                    <Image
-                                        className="h-14 w-14 shrink-0 object-contain"
-                                        src={assets.box_icon}
-                                        alt="box_icon"
-                                    />
+                                    <div className="h-14 w-14 shrink-0 rounded-xl bg-orange-50 border border-orange-200 flex items-center justify-center">
+                                        <Package className="h-7 w-7 text-orange-500" strokeWidth={2} />
+                                    </div>
                                     <div className="flex min-w-0 flex-col gap-2 text-gray-700">
                                         <div className="space-y-1 text-base font-semibold text-gray-800">
                                             {order.items.map((item, itemIndex) => (

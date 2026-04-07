@@ -13,7 +13,12 @@ const OrderSummary = () => {
   const [selectedAddress, setSelectedAddress] = useState(null)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  const getTokenRef = useRef(getToken)
   const idempotencyKeyRef = useRef('')
+  useEffect(() => {
+    getTokenRef.current = getToken
+  }, [getToken])
+
 
   const [userAddresses, setUserAddresses] = useState([])
   const subtotal = useMemo(() => getCartAmount(), [getCartAmount])
@@ -57,7 +62,10 @@ const OrderSummary = () => {
 
   const fetchUserAddresses = useCallback(async () => {
     try {
-      const token = await getToken()
+      const token = await getTokenRef.current?.()
+      if (!token) {
+        return
+      }
       const { data } = await axios.get('/api/user/get-address', {headers:{Authorization: `Bearer ${token}`}})
       if (data.success) {
         const addressList = data.addresses || []
@@ -72,7 +80,7 @@ const OrderSummary = () => {
     } catch (error) {
         toast.error(error.response?.data?.message || error.message)
     }
-  }, [getToken])
+  }, [])
 
   const handleAddressSelect = (address) => {
     setSelectedAddress(address);
@@ -139,10 +147,10 @@ const OrderSummary = () => {
   }
 
   useEffect(() => {
-    if (user) {
+    if (user?.id) {
       fetchUserAddresses()
     }
-  }, [user, fetchUserAddresses])
+  }, [user?.id, fetchUserAddresses])
 
   return (
     <div className="w-full md:w-96 bg-gray-500/5 p-5">

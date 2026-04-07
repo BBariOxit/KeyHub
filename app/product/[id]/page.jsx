@@ -13,13 +13,11 @@ import React from "react";
 import { formatVnd } from "@/lib/price";
 import { optimizeCloudinaryImage } from "@/lib/image";
 
-const CHECKOUT_IDEMPOTENCY_STORAGE_KEY = 'checkout-idempotency-key'
-
 const Product = () => {
 
     const { id } = useParams();
 
-    const { products, router, addToCart } = useAppContext()
+    const { products, router, addToCart, cartItems } = useAppContext()
 
     const [mainImage, setMainImage] = useState(null);
     const productData = useMemo(() => {
@@ -28,6 +26,8 @@ const Product = () => {
     const stock = Number.isFinite(productData?.stock) ? productData.stock : 0
     const isOutOfStock = stock <= 0
     const isLowStock = stock > 0 && stock <= 2
+    const cartQuantity = Number(cartItems?.[id] || 0)
+    const isCartAtStockLimit = !isOutOfStock && cartQuantity >= stock
     const categoryDisplay = Array.isArray(productData?.categoryNames) && productData.categoryNames.length > 0
         ? productData.categoryNames.join(', ')
         : Array.isArray(productData?.category) && productData.category.length > 0
@@ -139,21 +139,13 @@ const Product = () => {
                     <div className="flex items-center mt-10 gap-4">
                         <button
                             onClick={() => addToCart(productData._id)}
-                            disabled={isOutOfStock}
-                            className={`w-full py-3.5 transition ${isOutOfStock ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-gray-100 text-gray-800/80 hover:bg-gray-200'}`}
+                            disabled={isOutOfStock || isCartAtStockLimit}
+                            className={`w-full py-3.5 transition ${(isOutOfStock || isCartAtStockLimit) ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-gray-100 text-gray-800/80 hover:bg-gray-200'}`}
                         >
-                            Thêm vào giỏ
+                            {isOutOfStock ? 'Hết hàng' : isCartAtStockLimit ? 'Đã thêm tối đa' : 'Thêm vào giỏ'}
                         </button>
                         <button
-                            onClick={async () => {
-                                if (typeof window !== 'undefined' && typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-                                    window.sessionStorage.setItem(CHECKOUT_IDEMPOTENCY_STORAGE_KEY, crypto.randomUUID())
-                                }
-                                const added = await addToCart(productData._id)
-                                if (added) {
-                                    router.push('/cart')
-                                }
-                            }}
+                            onClick={() => router.push('/cart')}
                             disabled={isOutOfStock}
                             className={`w-full py-3.5 transition ${isOutOfStock ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'bg-orange-500 text-white hover:bg-orange-600'}`}
                         >
