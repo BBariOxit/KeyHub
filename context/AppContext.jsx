@@ -268,31 +268,62 @@ export const AppContextProvider = (props) => {
         }
     }, [debouncedSyncCart])
 
-    const addToCart = async (itemId) => {
+    const addToCart = async (itemId, options = {}) => {
+        const { showToast = true } = options
         if (!user) {
             await openSignIn()
             return false
         }
 
+        const product = products.find((item) => item._id === itemId)
+        const maxStock = Number.isFinite(product?.stock) ? Math.max(0, product.stock) : null
+
         const oldCartItems = structuredClone(cartItems)
         let cartData = structuredClone(cartItems);
-        cartData[itemId] = (cartData[itemId] || 0) + 1
+
+        const currentQuantity = cartData[itemId] || 0
+        const nextQuantity = maxStock === null
+            ? currentQuantity + 1
+            : Math.min(currentQuantity + 1, maxStock)
+
+        if (maxStock !== null && maxStock <= 0) {
+            return false
+        }
+
+        if (nextQuantity === currentQuantity) {
+            return false
+        }
+
+        cartData[itemId] = nextQuantity
         setCartItems(cartData)
-        toast.success('Sản phẩm đã được thêm vào giỏ hàng')
+        if (showToast) {
+            toast.success('Sản phẩm đã được thêm vào giỏ hàng')
+        }
         debouncedSyncCart(cartData, oldCartItems)
         return true
     }
 
-    const updateCartQuantity = async (itemId, quantity) => {
+    const updateCartQuantity = async (itemId, quantity, options = {}) => {
+        const { showToast = false } = options
         const oldCartItems = structuredClone(cartItems)
         let cartData = structuredClone(cartItems)
-        if (quantity <= 0) {
+
+        const parsedQuantity = Number.isFinite(quantity) ? Math.floor(quantity) : 0
+        const product = products.find((item) => item._id === itemId)
+        const maxStock = Number.isFinite(product?.stock) ? Math.max(0, product.stock) : null
+        const safeQuantity = maxStock === null
+            ? parsedQuantity
+            : Math.min(Math.max(parsedQuantity, 0), maxStock)
+
+        if (safeQuantity <= 0) {
             delete cartData[itemId]
         } else {
-            cartData[itemId] = quantity
+            cartData[itemId] = safeQuantity
         }
         setCartItems(cartData)
-        toast.success('Giỏ hàng đã được cập nhật')
+        if (showToast) {
+            toast.success('Giỏ hàng đã được cập nhật')
+        }
         if (user) {
             debouncedSyncCart(cartData, oldCartItems)
         }

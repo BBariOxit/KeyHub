@@ -1,4 +1,5 @@
 import connectDB from "@/config/db";
+import Product from "@/models/Product";
 import User from "@/models/User";
 import { clerkClient, getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
@@ -37,6 +38,32 @@ export async function POST(req) {
 
     await connectDB()
 
+    const productIds = Object.keys(cleanCartData)
+    const products = await Product.find({ _id: { $in: productIds } }).select('_id stock').lean()
+
+    const stockMap = new Map(
+      products.map((product) => [String(product._id), Number.isFinite(product.stock) ? Math.max(0, product.stock) : null])
+    )
+
+    const normalizedCartData = {}
+    for (const [productId, quantity] of Object.entries(cleanCartData)) {
+      const maxStock = stockMap.get(productId)
+
+      if (maxStock === undefined) {
+        continue
+      }
+
+      if (maxStock === null) {
+        normalizedCartData[productId] = quantity
+        continue
+      }
+
+      const cappedQuantity = Math.min(quantity, maxStock)
+      if (cappedQuantity > 0) {
+        normalizedCartData[productId] = cappedQuantity
+      }
+    }
+
     // User model đang dùng _id = clerk userId, không phải clerkId.
     let user = await User.findById(userId)
 
@@ -54,14 +81,14 @@ export async function POST(req) {
         name: fullName,
         email,
         imageUrl: clerkUser.imageUrl || "",
-        cartItems: cleanCartData 
+        cartItems: normalizedCartData
       })
 
       return NextResponse.json({ success: true })
     }
 
     await User.findByIdAndUpdate(userId, { 
-      $set: { cartItems: cleanCartData } 
+      $set: { cartItems: normalizedCartData }
     })
 
     return NextResponse.json({ success: true })
