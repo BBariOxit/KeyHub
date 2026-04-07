@@ -1,8 +1,10 @@
+"use client"
 import React from "react";
 import { assets } from "@/assets/assets";
 import Image from "next/image";
+import { useAppContext } from "@/context/AppContext";
 
-const products = [
+const featuredItems = [
   {
     id: 1,
     image: assets.feature_pro_1,
@@ -24,6 +26,13 @@ const products = [
 ];
 
 const FeaturedProduct = () => {
+  const { products: catalogProducts, router } = useAppContext()
+
+  const getProductPathByIndex = (index) => {
+    const productId = catalogProducts?.[index]?._id
+    return productId ? `/product/${productId}` : "/all-products"
+  }
+
   return (
     <div className="mt-14">
       <div className="flex flex-col items-center">
@@ -32,8 +41,8 @@ const FeaturedProduct = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-14 mt-12 md:px-14 px-4">
-        {products.map(({ id, image, title, description }) => (
-          <div key={id} className="relative group">
+        {featuredItems.map(({ id, image, title, description }, index) => (
+          <div key={`featured-${id}-${index}`} className="relative group">
             <Image
               src={image}
               alt={title}
@@ -46,7 +55,11 @@ const FeaturedProduct = () => {
               <p className="text-sm lg:text-base leading-5 max-w-[22rem]">
                 {description}
               </p>
-              <button className="flex items-center gap-1.5 bg-orange-600 px-4 py-2 rounded">
+              <button
+                type="button"
+                onClick={() => router.push(getProductPathByIndex(index))}
+                className="flex items-center gap-1.5 bg-orange-600 px-4 py-2 rounded"
+              >
                 Mua ngay <Image className="h-3 w-3" src={assets.redirect_icon} alt="Redirect Icon" />
               </button>
             </div>

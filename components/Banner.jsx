@@ -1,8 +1,15 @@
+"use client"
 import React from "react";
 import { assets } from "@/assets/assets";
 import Image from "next/image";
+import { useAppContext } from "@/context/AppContext";
 
 const Banner = () => {
+  const { products, router } = useAppContext()
+
+  const targetProductId = products?.[0]?._id
+  const targetPath = targetProductId ? `/product/${targetProductId}` : '/all-products'
+
   return (
     <div className="flex flex-col md:flex-row items-center justify-between md:px-12 lg:px-16 py-14 md:py-10 bg-[#E6E9F2] my-16 rounded-xl overflow-hidden">
       <Image
@@ -19,7 +26,11 @@ const Banner = () => {
         <p className="max-w-[343px] font-medium text-gray-800/60">
           Tốc độ phản hồi nhanh, độ chính xác cao - mọi thứ bạn cần để chiến thắng
         </p>
-        <button className="group flex items-center justify-center gap-1 px-12 py-2.5 bg-orange-600 rounded text-white">
+        <button
+          type="button"
+          onClick={() => router.push(targetPath)}
+          className="group flex items-center justify-center gap-1 px-12 py-2.5 bg-orange-600 rounded text-white"
+        >
           Mua ngay
           <Image className="group-hover:translate-x-1 transition" src={assets.arrow_icon_white} alt="arrow_icon_white" />
         </button>
