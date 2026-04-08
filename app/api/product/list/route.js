@@ -5,14 +5,22 @@ import { NextResponse } from "next/server";
 export const revalidate = 60;
 export async function GET(req) {
   try {
-  
+    const { searchParams } = new URL(req.url)
+    const rawPage = searchParams.get('page')
+    const rawLimit = searchParams.get('limit')
+    const parsedPage = Number.parseInt(rawPage || '', 10)
+    const parsedLimit = Number.parseInt(rawLimit || '', 10)
+    const usePagination = Number.isFinite(parsedPage) && Number.isFinite(parsedLimit)
+    const page = usePagination ? Math.max(1, parsedPage) : 1
+    const limit = usePagination ? Math.min(Math.max(1, parsedLimit), 50) : 0
+
     await connectDB()
 
     const hasMultiCategorySchema = Boolean(Product.schema.path('categoryIds'))
     const categoryProjection = hasMultiCategorySchema ? { categoryIds: 1 } : { categoryId: 1 }
     const populatePath = hasMultiCategorySchema ? 'categoryIds' : 'categoryId'
 
-    const productsRaw = await Product.find(
+    let productsQuery = Product.find(
       {},
       {
         name: 1,
@@ -28,7 +36,13 @@ export async function GET(req) {
     )
       .populate({ path: populatePath, select: 'name slug' })
       .sort({ date: -1 })
-      .lean()
+
+    if (usePagination) {
+      const skip = (page - 1) * limit
+      productsQuery = productsQuery.skip(skip).limit(limit)
+    }
+
+    const productsRaw = await productsQuery.lean()
 
     const normalizedProducts = productsRaw.map((product) => {
       const populatedCategoryDocs = hasMultiCategorySchema
@@ -67,6 +81,22 @@ export async function GET(req) {
         categorySlug: categorySlugs[0] || null
       }
     })
+
+    if (usePagination) {
+      const total = await Product.countDocuments({})
+      const hasMore = page * limit < total
+
+      return NextResponse.json({
+        success: true,
+        products: normalizedProducts,
+        pagination: {
+          page,
+          limit,
+          total,
+          hasMore
+        }
+      })
+    }
 
     return NextResponse.json({ success: true, products: normalizedProducts }) 
   } catch (error) {

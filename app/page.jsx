@@ -10,7 +10,9 @@ import connectDB from "@/config/db";
 import Product from "@/models/Product";
 
 export const revalidate = 60;
-async function getInitialProducts() {
+const HOME_PRODUCTS_PER_PAGE = 15
+
+async function getInitialProductsPage() {
   try {
     await connectDB();
 
@@ -34,8 +36,10 @@ async function getInitialProducts() {
     )
       .populate({ path: populatePath, select: 'name slug' })
       .sort({ date: -1 })
-      .limit(20)
+      .limit(HOME_PRODUCTS_PER_PAGE)
       .lean();
+
+    const total = await Product.countDocuments({})
 
     const normalizedProducts = productDocs.map((product) => {
       const populatedCategoryDocs = hasMultiCategorySchema
@@ -75,22 +79,38 @@ async function getInitialProducts() {
       }
     })
 
-    return normalizedProducts;
+    return {
+      products: normalizedProducts,
+      pagination: {
+        page: 1,
+        limit: HOME_PRODUCTS_PER_PAGE,
+        total,
+        hasMore: HOME_PRODUCTS_PER_PAGE < total
+      }
+    };
   } catch (error) {
     console.error("Home product prefetch error:", error);
-    return [];
+    return {
+      products: [],
+      pagination: {
+        page: 1,
+        limit: HOME_PRODUCTS_PER_PAGE,
+        total: 0,
+        hasMore: false
+      }
+    };
   }
 }
 
 const Home = async () => {
-  const initialProducts = await getInitialProducts();
+  const { products: initialProducts, pagination } = await getInitialProductsPage();
 
   return (
     <>
       <Navbar/>
       <div className="px-6 md:px-16 lg:px-32">
         <HeaderSlider />
-        <HomeProducts initialProducts={initialProducts} />
+        <HomeProducts initialProducts={initialProducts} initialPagination={pagination} />
         <FeaturedProduct />
         <Banner />
         <NewsLetter />
