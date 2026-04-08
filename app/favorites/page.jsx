@@ -14,6 +14,7 @@ const FavoritesPage = () => {
 
     const [products, setProducts] = useState([])
     const [loading, setLoading] = useState(true)
+    const skeletonCount = favoriteIds.length
 
     useEffect(() => {
         let cancelled = false
@@ -89,7 +90,24 @@ const FavoritesPage = () => {
                 )}
 
                 {user && loading && (
-                    <div className="w-full mt-12 text-gray-500">Đang tải danh sách yêu thích...</div>
+                    skeletonCount > 0
+                        ? (
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mt-12 pb-14 w-full">
+                                {Array.from({ length: skeletonCount }).map((_, index) => (
+                                    <div
+                                        key={`favorite-skeleton-${index}`}
+                                        className="w-full max-w-[200px] animate-pulse"
+                                    >
+                                        <div className="relative rounded-lg h-52 bg-gray-200" />
+                                        <div className="mt-3 h-4 rounded bg-gray-200" />
+                                        <div className="mt-2 h-3 w-2/3 rounded bg-gray-200" />
+                                        <div className="mt-2 h-3 w-5/6 rounded bg-gray-200" />
+                                        <div className="mt-3 h-5 w-1/2 rounded bg-gray-200" />
+                                    </div>
+                                ))}
+                            </div>
+                        )
+                        : <div className="w-full mt-12 text-gray-500">Đang tải danh sách yêu thích...</div>
                 )}
 
                 {user && !loading && visibleProducts.length === 0 && (
