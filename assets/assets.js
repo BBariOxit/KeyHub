@@ -90,3 +90,9 @@ export const HomeIcon = () => (
     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="m4 12 8-8 8 8M6 10.5V19a1 1 0 0 0 1 1h3v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h3a1 1 0 0 0 1-1v-8.5" />
   </svg>
 );
+
+export const HeartIcon = () => (
+  <svg className="w-5 h-5 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12.001 20.727 3.75 12.476a4.95 4.95 0 0 1 0-7 4.95 4.95 0 0 1 7 0l1.25 1.25 1.25-1.25a4.95 4.95 0 0 1 7 0 4.95 4.95 0 0 1 0 7l-8.249 8.251Z" />
+  </svg>
+);
