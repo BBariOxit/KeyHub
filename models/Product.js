@@ -22,16 +22,19 @@ const productSchema = new mongoose.Schema({
   offerPrice: { type: Number, required: true },
   image: { type: [String], required: true },
   categoryIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'category' }],
-  category: { type: [String], default: [] },
   stock: {
     type: Number,
     required: true,
     default: 0,
     min: 0
   },
-  date: { type: Number, required: true }
+  timestamp: { type: Number, required: true, default: Date.now }
 })
 
-const Product = mongoose.models.product || mongoose.model('product', productSchema)
+if (mongoose.models.product) {
+  delete mongoose.models.product
+}
+
+const Product = mongoose.model('product', productSchema)
 
 export default Product

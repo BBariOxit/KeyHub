@@ -40,7 +40,7 @@ export async function GET(req) {
     let query = Product.find(
       { userId },
       projection
-    ).sort({ date: -1 })
+    ).sort({ timestamp: -1, date: -1 })
 
     if (hasCategoryIdsPath) {
       query = query.populate({ path: 'categoryIds', select: 'name slug' })

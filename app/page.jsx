@@ -31,11 +31,11 @@ async function getInitialProductsPage() {
         ...categoryProjection,
         category: 1,
         stock: 1,
-        date: 1,
+        timestamp: 1,
       }
     )
       .populate({ path: populatePath, select: 'name slug' })
-      .sort({ date: -1 })
+      .sort({ timestamp: -1, date: -1 })
       .limit(HOME_PRODUCTS_PER_PAGE)
       .lean();
 

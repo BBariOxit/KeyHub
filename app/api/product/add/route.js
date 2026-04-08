@@ -217,10 +217,6 @@ export async function POST(req) {
       return NextResponse.json({ success: false, message: 'Vui lòng chọn ít nhất một danh mục.' }, { status: 400 })
     }
 
-    const categoryNames = categoryDocs.map((item) => item.name)
-    const categorySchemaPath = Product.schema.path('category')
-    const useArrayCategory = categorySchemaPath?.instance === 'Array'
-
     const productPayload = {
       userId,
       name,
@@ -231,8 +227,7 @@ export async function POST(req) {
       offerPrice,
       stock,
       image,
-      date: Date.now(),
-      category: useArrayCategory ? categoryNames : categoryNames.join(', ')
+      timestamp: Date.now()
     }
 
     // Tương thích cả schema mới (categoryIds) lẫn schema cũ đang cache trong dev server.

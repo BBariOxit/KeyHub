@@ -10,9 +10,13 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^7.0.1",
+    "@tiptap/pm": "^3.22.3",
+    "@tiptap/react": "^3.22.3",
+    "@tiptap/starter-kit": "^3.22.3",
     "axios": "^1.13.6",
     "cloudinary": "^2.9.0",
     "inngest": "^3.52.6",
+    "isomorphic-dompurify": "^3.7.1",
     "lodash": "^4.17.23",
     "lucide-react": "^1.7.0",
     "mongoose": "^9.2.4",
@@ -24,6 +28,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@tailwindcss/typography": "^0.5.19",
     "eslint": "^9",
     "eslint-config-next": "15.1.6",
     "postcss": "^8",

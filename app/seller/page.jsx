@@ -7,6 +7,20 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { formatThousandsInput, getNumericString } from "@/lib/price";
 import Link from "next/link";
+import { EditorContent, useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+
+const RichTextControlButton = ({ isActive, onClick, label }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={`px-2.5 py-1.5 text-xs rounded border transition ${isActive ? 'bg-orange-100 border-orange-300 text-orange-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+  >
+    {label}
+  </button>
+)
+
+const createEmptySpecification = () => ({ key: '', value: '' })
 
 const AddProduct = () => {
 
@@ -15,6 +29,8 @@ const AddProduct = () => {
   const [files, setFiles] = useState([]);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [detailedDescription, setDetailedDescription] = useState('');
+  const [specifications, setSpecifications] = useState([createEmptySpecification()]);
   const [categoryIds, setCategoryIds] = useState([]);
   const [price, setPrice] = useState('');
   const [offerPrice, setOfferPrice] = useState('');
@@ -23,6 +39,21 @@ const AddProduct = () => {
   const [submitting, setSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
   const categoryRef = useRef(null)
+
+  const detailedDescriptionEditor = useEditor({
+    immediatelyRender: false,
+    extensions: [StarterKit],
+    content: '',
+    editorProps: {
+      attributes: {
+        class: 'prose prose-sm max-w-none min-h-[220px] px-3 py-2.5 focus:outline-none'
+      }
+    },
+    onUpdate: ({ editor }) => {
+      setDetailedDescription(editor.getHTML())
+      clearError('detailedDescription')
+    }
+  })
 
   const [previewUrls, setPreviewUrls] = useState([]);
 
@@ -78,6 +109,22 @@ const AddProduct = () => {
   const previewImage = previewUrls[0] || assets.upload_area
   const stockNumber = Math.max(0, Number(stock || 0))
   const stockStatus = stockNumber <= 0 ? 'Hết hàng' : stockNumber <= 2 ? `Sắp hết (${stockNumber})` : `Còn ${stockNumber}`
+  const normalizedSpecifications = useMemo(() => {
+    return specifications
+      .map((item) => ({
+        key: item.key.trim(),
+        value: item.value.trim()
+      }))
+      .filter((item) => item.key && item.value)
+  }, [specifications])
+
+  const hasIncompleteSpecification = useMemo(() => {
+    return specifications.some((item) => {
+      const hasKey = item.key.trim() !== ''
+      const hasValue = item.value.trim() !== ''
+      return hasKey !== hasValue
+    })
+  }, [specifications])
 
   const toggleCategory = (id) => {
     setCategoryIds((prev) => {
@@ -98,6 +145,34 @@ const AddProduct = () => {
     })
   }
 
+  const handleSpecificationChange = (index, field, nextValue) => {
+    setSpecifications((prev) => prev.map((item, itemIndex) => (
+      itemIndex === index
+        ? { ...item, [field]: nextValue }
+        : item
+    )))
+    clearError('specifications')
+  }
+
+  const addSpecificationRow = () => {
+    if (specifications.length >= 50) {
+      toast.error('Tối đa 50 thông số kỹ thuật')
+      return
+    }
+
+    setSpecifications((prev) => [...prev, createEmptySpecification()])
+  }
+
+  const removeSpecificationRow = (index) => {
+    setSpecifications((prev) => {
+      if (prev.length <= 1) {
+        return [createEmptySpecification()]
+      }
+      return prev.filter((_, itemIndex) => itemIndex !== index)
+    })
+    clearError('specifications')
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFieldErrors({})
@@ -112,9 +187,16 @@ const AddProduct = () => {
       return
     }
 
+    if (hasIncompleteSpecification) {
+      setFieldErrors({ specifications: 'Mỗi dòng thông số cần nhập đủ cả tên và giá trị' })
+      return
+    }
+
     const formData = new FormData()
     formData.append('name', name)
     formData.append('description', description)
+    formData.append('detailedDescription', detailedDescription)
+    formData.append('specifications', JSON.stringify(normalizedSpecifications))
     categoryIds.forEach((id) => formData.append('categoryIds', id))
     formData.append('price', getNumericString(price))
     formData.append('offerPrice', getNumericString(offerPrice))
@@ -136,6 +218,9 @@ const AddProduct = () => {
         setFiles([])
         setName('')
         setDescription('')
+        setDetailedDescription('')
+        setSpecifications([createEmptySpecification()])
+        detailedDescriptionEditor?.commands.clearContent()
         setCategoryIds(categories[0]?._id ? [categories[0]._id] : [])
         setPrice('')
         setOfferPrice('')
@@ -261,6 +346,82 @@ const AddProduct = () => {
               value={description}
               required
             ></textarea>
+          </div>
+          <div className="flex flex-col gap-2 w-full">
+            <label className="text-base font-medium">Mô tả chi tiết</label>
+
+            <div className="flex flex-wrap gap-2 p-2 rounded-t border border-gray-500/40 border-b-0 bg-gray-50/60">
+              <RichTextControlButton
+                label="Đậm"
+                isActive={Boolean(detailedDescriptionEditor?.isActive('bold'))}
+                onClick={() => detailedDescriptionEditor?.chain().focus().toggleBold().run()}
+              />
+              <RichTextControlButton
+                label="Nghiêng"
+                isActive={Boolean(detailedDescriptionEditor?.isActive('italic'))}
+                onClick={() => detailedDescriptionEditor?.chain().focus().toggleItalic().run()}
+              />
+              <RichTextControlButton
+                label="Tiêu đề"
+                isActive={Boolean(detailedDescriptionEditor?.isActive('heading', { level: 3 }))}
+                onClick={() => detailedDescriptionEditor?.chain().focus().toggleHeading({ level: 3 }).run()}
+              />
+              <RichTextControlButton
+                label="Danh sách"
+                isActive={Boolean(detailedDescriptionEditor?.isActive('bulletList'))}
+                onClick={() => detailedDescriptionEditor?.chain().focus().toggleBulletList().run()}
+              />
+            </div>
+
+            <div className="rounded-b border border-gray-500/40 bg-white">
+              <EditorContent editor={detailedDescriptionEditor} />
+            </div>
+
+            <p className="text-xs text-gray-500">Nội dung này sẽ hiển thị ở trang chi tiết sản phẩm.</p>
+            {fieldErrors.detailedDescription && <p className="text-xs text-red-500">{fieldErrors.detailedDescription}</p>}
+          </div>
+
+          <div className="flex flex-col gap-2 w-full">
+            <label className="text-base font-medium">Thông số kỹ thuật</label>
+
+            <div className="space-y-2 rounded border border-gray-500/40 p-3 bg-gray-50/40">
+              {specifications.map((spec, index) => (
+                <div key={`spec-${index}`} className="grid grid-cols-1 md:grid-cols-[minmax(0,180px)_minmax(0,1fr)_90px] gap-2 items-center">
+                  <input
+                    type="text"
+                    placeholder="Tên thông số"
+                    className="outline-none py-2 px-3 rounded border border-gray-300"
+                    value={spec.key}
+                    onChange={(event) => handleSpecificationChange(index, 'key', event.target.value)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Giá trị"
+                    className="outline-none py-2 px-3 rounded border border-gray-300"
+                    value={spec.value}
+                    onChange={(event) => handleSpecificationChange(index, 'value', event.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeSpecificationRow(index)}
+                    className="px-3 py-2 text-sm rounded border border-red-200 text-red-600 hover:bg-red-50"
+                  >
+                    Xóa
+                  </button>
+                </div>
+              ))}
+
+              <button
+                type="button"
+                onClick={addSpecificationRow}
+                className="px-3 py-2 text-sm rounded border border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
+              >
+                + Thêm thông số
+              </button>
+            </div>
+
+            <p className="text-xs text-gray-500">Để trống cả dòng nếu chưa cần thêm thông số.</p>
+            {fieldErrors.specifications && <p className="text-xs text-red-500">{fieldErrors.specifications}</p>}
           </div>
           <div className="space-y-4">
             <div className="flex flex-col gap-1 w-full min-w-0">

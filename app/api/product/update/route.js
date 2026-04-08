@@ -260,12 +260,6 @@ export async function POST(req) {
         return NextResponse.json({ success: false, message: "Vui lòng chọn ít nhất một danh mục." }, { status: 400 });
       }
 
-      const categoryNames = categoryDocs.map((item) => item.name);
-      const categorySchemaPath = Product.schema.path("category");
-      const useArrayCategory = categorySchemaPath?.instance === "Array";
-
-      updatePayload.category = useArrayCategory ? categoryNames : categoryNames.join(", ");
-
       if (Product.schema.path("categoryIds")) {
         updatePayload.categoryIds = categoryDocs.map((item) => item._id);
       }
