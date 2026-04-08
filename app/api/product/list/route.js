@@ -25,6 +25,8 @@ export async function GET(req) {
       {
         name: 1,
         description: 1,
+        detailedDescription: 1,
+        specifications: 1,
         price: 1,
         offerPrice: 1,
         image: 1,

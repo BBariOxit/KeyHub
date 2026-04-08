@@ -1,5 +1,7 @@
 /* eslint-disable import/no-anonymous-default-export */
 /** @type {import('tailwindcss').Config} */
+import typography from '@tailwindcss/typography'
+
 export default {
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -17,5 +19,5 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [typography],
 };

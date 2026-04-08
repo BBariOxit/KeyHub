@@ -12,14 +12,17 @@ import { useAppContext } from "@/context/AppContext";
 import React from "react";
 import { formatVnd } from "@/lib/price";
 import { optimizeCloudinaryImage } from "@/lib/image";
+import DOMPurify from "isomorphic-dompurify";
 
 const Product = () => {
+    const SPECIFICATIONS_PREVIEW_LIMIT = 6
 
     const { id } = useParams();
 
     const { products, router, addToCart, cartItems } = useAppContext()
 
     const [mainImage, setMainImage] = useState(null);
+    const [isSpecificationExpanded, setIsSpecificationExpanded] = useState(false)
     const productData = useMemo(() => {
         return products.find((product) => product._id === id) || null;
     }, [products, id]);
@@ -35,9 +38,51 @@ const Product = () => {
             : typeof productData?.category === 'string' && productData.category
                 ? productData.category
                 : 'Chưa phân loại'
+    const cleanDetailedDescription = useMemo(() => {
+        return DOMPurify.sanitize(productData?.detailedDescription || '')
+    }, [productData?.detailedDescription])
+    const hasDetailedDescription = useMemo(() => {
+        const plainText = cleanDetailedDescription
+            .replace(/<[^>]*>/g, ' ')
+            .replace(/&nbsp;/g, ' ')
+            .trim()
+
+        return plainText.length > 0
+    }, [cleanDetailedDescription])
+    const normalizedSpecifications = useMemo(() => {
+        const rawSpecifications = productData?.specifications
+
+        if (Array.isArray(rawSpecifications)) {
+            return rawSpecifications
+                .map((item) => ({
+                    key: String(item?.key || '').trim(),
+                    value: String(item?.value || '').trim()
+                }))
+                .filter((item) => item.key && item.value)
+        }
+
+        if (rawSpecifications && typeof rawSpecifications === 'object') {
+            return Object.entries(rawSpecifications)
+                .map(([key, value]) => ({
+                    key: String(key || '').trim(),
+                    value: String(value || '').trim()
+                }))
+                .filter((item) => item.key && item.value)
+        }
+
+        return []
+    }, [productData?.specifications])
+    const visibleSpecifications = isSpecificationExpanded
+        ? normalizedSpecifications
+        : normalizedSpecifications.slice(0, SPECIFICATIONS_PREVIEW_LIMIT)
+    const hasMoreSpecifications = normalizedSpecifications.length > SPECIFICATIONS_PREVIEW_LIMIT
 
     useEffect(() => {
         setMainImage(null)
+    }, [id])
+
+    useEffect(() => {
+        setIsSpecificationExpanded(false)
     }, [id])
 
     return productData ? (<>
@@ -154,6 +199,55 @@ const Product = () => {
                     </div>
                 </div>
             </div>
+
+            <section className="pt-4 grid grid-cols-1 lg:grid-cols-[minmax(0,7fr)_minmax(0,3fr)] gap-8 lg:gap-10 items-start">
+                <div>
+                    <h2 className="text-2xl font-semibold text-gray-900">Mô tả chi tiết</h2>
+                    <div className="mt-4 rounded-xl border border-gray-200 bg-white p-5">
+                        {hasDetailedDescription ? (
+                            <div
+                                className="prose prose-sm md:prose-base max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-li:text-gray-700 prose-strong:text-gray-900 prose-img:rounded-xl"
+                                dangerouslySetInnerHTML={{ __html: cleanDetailedDescription }}
+                            />
+                        ) : (
+                            <p className="text-gray-500">Sản phẩm chưa có mô tả chi tiết.</p>
+                        )}
+                    </div>
+                </div>
+
+                <aside className="lg:sticky lg:top-5 self-start">
+                    <h2 className="text-2xl font-semibold text-gray-900">Thông số kỹ thuật</h2>
+                    <div className="mt-4 overflow-x-auto rounded-lg border border-gray-200 bg-white">
+                        <table className="table-fixed border-collapse w-full">
+                            <tbody>
+                                {visibleSpecifications.length > 0 ? (
+                                    visibleSpecifications.map((specification, index) => (
+                                        <tr key={`${specification.key}-${index}`} className={index % 2 === 0 ? 'bg-gray-50/60' : ''}>
+                                            <td className="text-gray-700 font-medium whitespace-nowrap w-36 px-4 py-3">{specification.key}</td>
+                                            <td className="text-gray-700 px-4 py-3">{specification.value}</td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={2} className="px-4 py-4 text-gray-500">Sản phẩm chưa có thông số kỹ thuật chi tiết.</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {hasMoreSpecifications && (
+                        <button
+                            type="button"
+                            onClick={() => setIsSpecificationExpanded((prev) => !prev)}
+                            className="mt-3 text-sm font-medium text-orange-600 hover:text-orange-700"
+                        >
+                            {isSpecificationExpanded ? 'Thu gọn cấu hình' : 'Xem cấu hình chi tiết'}
+                        </button>
+                    )}
+                </aside>
+            </section>
+
             <div className="flex flex-col items-center">
                 <div className="flex flex-col items-center mb-4 mt-16">
                     <p className="text-3xl font-medium">Sản phẩm <span className="font-medium text-orange-600">nổi bật</span></p>
