@@ -1,16 +1,18 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { assets } from '@/assets/assets'
 import Image from 'next/image';
 import Link from 'next/link';
 import { useAppContext } from '@/context/AppContext';
 import { formatVnd } from '@/lib/price';
 import { optimizeCloudinaryImage } from '@/lib/image';
+import { Heart } from 'lucide-react';
 
 const STAR_INDICES = [0, 1, 2, 3, 4]
 
 const ProductCard = ({ product }) => {
 
-    const { currency, router } = useAppContext()
+    const { currency, isFavorite, toggleFavorite } = useAppContext()
+    const [favoriteLoading, setFavoriteLoading] = useState(false)
     const rating = Number.isFinite(product?.rating) ? product.rating : 4.5
     const cardImage = optimizeCloudinaryImage(product?.image?.[0], { width: 420, quality: 'auto' })
     const stock = Number.isFinite(product?.stock) ? product.stock : 0
@@ -30,6 +32,21 @@ const ProductCard = ({ product }) => {
         .filter(Boolean)
 
     const categoryLabel = categoryList[0] || 'Chưa phân loại'
+    const productId = String(product?._id || '')
+    const favorited = isFavorite(productId)
+
+    const handleToggleFavorite = async (event) => {
+        event.preventDefault()
+        event.stopPropagation()
+
+        if (favoriteLoading || !productId) {
+            return
+        }
+
+        setFavoriteLoading(true)
+        await toggleFavorite(productId)
+        setFavoriteLoading(false)
+    }
 
     return (
         <Link
@@ -50,13 +67,13 @@ const ProductCard = ({ product }) => {
                 />
                 <button
                     type="button"
-                    onClick={(e) => e.stopPropagation()}
-                    className="absolute top-2 right-2 bg-white p-2 rounded-full shadow-md"
+                    onClick={handleToggleFavorite}
+                    disabled={favoriteLoading}
+                    className="absolute top-2 right-2 bg-white p-2 rounded-full shadow-md disabled:opacity-70"
+                    aria-label={favorited ? 'Bo yeu thich' : 'Them vao yeu thich'}
                 >
-                    <Image
-                        className="h-3 w-3"
-                        src={assets.heart_icon}
-                        alt="heart_icon"
+                    <Heart
+                        className={`h-3.5 w-3.5 transition ${favorited ? 'fill-red-500 text-red-500' : 'text-gray-500'}`}
                     />
                 </button>
             </div>

@@ -18,9 +18,9 @@ export const AppContextProvider = (props) => {
     const currency = process.env.NEXT_PUBLIC_CURRENCY
     const router = useRouter()
 
-    const { user } = useUser()
+    const { user, isLoaded: isUserLoaded } = useUser()
     const { openSignIn } = useClerk()
-    const { getToken } = useAuth()
+    const { getToken, isSignedIn } = useAuth()
     const getTokenRef = useRef(getToken)
     const userId = user?.id || null
     const userRole = user?.publicMetadata?.role
@@ -39,7 +39,10 @@ export const AppContextProvider = (props) => {
     const [userData, setUserData] = useState(false)
     const [isSeller, setIsSeller] = useState(false)
     const [cartItems, setCartItems] = useState({})
+    const [favoriteIds, setFavoriteIds] = useState([])
     const isMountedRef = useRef(true)
+    const lastFavoriteMutationAtRef = useRef(0)
+    const isAuthLoaded = isUserLoaded
 
     useEffect(() => {
         getTokenRef.current = getToken
@@ -223,6 +226,7 @@ export const AppContextProvider = (props) => {
 
     const fetchUserData = async (role) => {
         try {
+            const requestStartedAt = Date.now()
             setIsSeller(role === 'seller')
 
             const token = await getTokenRef.current?.()
@@ -232,8 +236,17 @@ export const AppContextProvider = (props) => {
             const { data } = await axios.get('/api/user/data', { headers: { Authorization: `Bearer ${token}` } }) 
             if (data.success) {
                 if (isMountedRef.current) {
+                    const serverFavorites = Array.isArray(data.user?.favorites)
+                        ? data.user.favorites.map((id) => String(id)).filter(Boolean)
+                        : []
+
                     setUserData(data.user)
                     setCartItems(data.user.cartItems)
+
+                    // Skip stale favorite data if user toggled favorite after this request started.
+                    if (requestStartedAt >= lastFavoriteMutationAtRef.current) {
+                        setFavoriteIds(serverFavorites)
+                    }
                 }
             } else {
                 toast.error(data.message)
@@ -271,7 +284,9 @@ export const AppContextProvider = (props) => {
     const addToCart = async (itemId, options = {}) => {
         const { showToast = true } = options
         if (!user) {
-            await openSignIn()
+            if (isSignedIn === false) {
+                await openSignIn()
+            }
             return false
         }
 
@@ -302,6 +317,76 @@ export const AppContextProvider = (props) => {
         debouncedSyncCart(cartData, oldCartItems)
         return true
     }
+
+    const isFavorite = useCallback((productId) => {
+        const normalizedProductId = String(productId || '')
+        if (!normalizedProductId) {
+            return false
+        }
+
+        return favoriteIds.includes(normalizedProductId)
+    }, [favoriteIds])
+
+    const toggleFavorite = useCallback(async (productId, options = {}) => {
+        const { showToast = false } = options
+
+        if (!user) {
+            if (isSignedIn === false) {
+                await openSignIn()
+            }
+            return false
+        }
+
+        const normalizedProductId = String(productId || '').trim()
+        if (!normalizedProductId) {
+            return false
+        }
+
+        const previousFavorites = [...favoriteIds]
+        const shouldAdd = !previousFavorites.includes(normalizedProductId)
+        const nextFavorites = shouldAdd
+            ? [...previousFavorites, normalizedProductId]
+            : previousFavorites.filter((id) => id !== normalizedProductId)
+
+        lastFavoriteMutationAtRef.current = Date.now()
+        setFavoriteIds(nextFavorites)
+
+        try {
+            const token = await getTokenRef.current?.()
+            if (!token) {
+                setFavoriteIds(previousFavorites)
+                return false
+            }
+
+            const { data } = await axios.post(
+                '/api/user/favorite/toggle',
+                { productId: normalizedProductId },
+                { headers: { Authorization: `Bearer ${token}` } }
+            )
+
+            if (!data.success) {
+                throw new Error(data.message || 'Không thể cập nhật yêu thích')
+            }
+
+            const serverFavorites = Array.isArray(data.favorites)
+                ? data.favorites.map((id) => String(id)).filter(Boolean)
+                : nextFavorites
+
+            lastFavoriteMutationAtRef.current = Date.now()
+            setFavoriteIds(serverFavorites)
+            setUserData((prev) => prev ? { ...prev, favorites: serverFavorites } : prev)
+
+            if (showToast && data.message) {
+                toast.success(data.message)
+            }
+
+            return data.isFavorite
+        } catch (error) {
+            setFavoriteIds(previousFavorites)
+            toast.error(error.response?.data?.message || error.message)
+            return false
+        }
+    }, [favoriteIds, openSignIn, user])
 
     const updateCartQuantity = async (itemId, quantity, options = {}) => {
         const { showToast = false } = options
@@ -371,13 +456,14 @@ export const AppContextProvider = (props) => {
         setIsSeller(false)
         setUserData(false)
         setCartItems({})
+        setFavoriteIds([])
         setSellerProducts([])
         setSuppliers([])
         setInventoryReceipts([])
     }, [userId, userRole, fetchSellerProducts, fetchSuppliers, fetchInventoryReceipts])
 
     const value = {
-        user, getToken,
+        user, getToken, isSignedIn, isAuthLoaded,
         currency, router,
         isSeller, setIsSeller,
         userData, fetchUserData,
@@ -387,6 +473,7 @@ export const AppContextProvider = (props) => {
         suppliers, fetchSuppliers, suppliersLoading,
         inventoryReceipts, fetchInventoryReceipts, inventoryReceiptsLoading,
         cartItems, setCartItems,
+        favoriteIds, isFavorite, toggleFavorite,
         addToCart, updateCartQuantity,
         getCartCount, getCartAmount
     }
