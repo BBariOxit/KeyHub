@@ -10,9 +10,59 @@ import z from "zod";
 
 const objectIdSchema = z.string().trim().regex(/^[a-f\d]{24}$/i, "ID không hợp lệ")
 
+const normalizeSpecificationsInput = (value) => {
+  if (value == null || value === '') {
+    return []
+  }
+
+  if (Array.isArray(value)) {
+    return value
+  }
+
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value)
+      if (Array.isArray(parsed)) {
+        return parsed
+      }
+
+      if (parsed && typeof parsed === 'object') {
+        return Object.entries(parsed).map(([key, val]) => ({
+          key,
+          value: val == null ? '' : String(val)
+        }))
+      }
+    } catch {
+      return value
+    }
+  }
+
+  if (value && typeof value === 'object') {
+    return Object.entries(value).map(([key, val]) => ({
+      key,
+      value: val == null ? '' : String(val)
+    }))
+  }
+
+  return value
+}
+
+const specificationSchema = z.object({
+  key: z.string().trim().min(1, 'Tên thông số không được để trống').max(80, 'Tên thông số quá dài'),
+  value: z.string().trim().min(1, 'Giá trị thông số không được để trống').max(300, 'Giá trị thông số quá dài')
+})
+
 const productCreateSchema = z.object({
   name: z.string().trim().min(2, 'Tên sản phẩm quá ngắn').max(120, 'Tên sản phẩm quá dài'),
   description: z.string().trim().min(5, 'Mô tả quá ngắn').max(2000, 'Mô tả quá dài'),
+  detailedDescription: z.preprocess(
+    (value) => (value == null ? '' : value),
+    z.string().max(40000, 'Mô tả chi tiết quá dài').default('')
+  ),
+  specifications: z.preprocess(
+    normalizeSpecificationsInput,
+    z.array(specificationSchema).max(50, 'Tối đa 50 thông số kỹ thuật').default([])
+  ),
   categoryIds: z.preprocess(
     (value) => {
       if (Array.isArray(value)) {
@@ -73,6 +123,8 @@ export async function POST(req) {
     const validation = productCreateSchema.safeParse({
       name: formData.get('name'),
       description: formData.get('description'),
+      detailedDescription: formData.get('detailedDescription'),
+      specifications: formData.get('specifications'),
       categoryIds: formData.getAll('categoryIds'),
       categoryId: formData.get('categoryId'),
       category: formData.get('category'),
@@ -127,7 +179,18 @@ export async function POST(req) {
 
     await connectDB()
 
-    const { name, description, categoryIds, categoryId, category, price, offerPrice, stock } = validation.data
+    const {
+      name,
+      description,
+      detailedDescription,
+      specifications,
+      categoryIds,
+      categoryId,
+      category,
+      price,
+      offerPrice,
+      stock
+    } = validation.data
 
     const resolvedCategoryIds = [...new Set([
       ...categoryIds,
@@ -162,6 +225,8 @@ export async function POST(req) {
       userId,
       name,
       description,
+      detailedDescription,
+      specifications,
       price,
       offerPrice,
       stock,
