@@ -36,11 +36,11 @@ export async function GET(req) {
         ...categoryProjection,
         category: 1,
         stock: 1,
-        date: 1
+        timestamp: 1
       }
     )
       .populate({ path: populatePath, select: "name slug" })
-      .sort({ date: -1 })
+      .sort({ timestamp: -1, date: -1 })
       .lean();
 
     const normalizedProducts = productsRaw.map((product) => {

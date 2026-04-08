@@ -13,7 +13,14 @@ export const useAppContext = () => {
     return useContext(AppContext)
 }
 
+const normalizeFavoriteIds = (favoriteIds = []) => (
+    Array.isArray(favoriteIds)
+        ? favoriteIds.map((id) => String(id)).filter(Boolean)
+        : []
+)
+
 export const AppContextProvider = (props) => {
+    const { initialFavoriteIds = [], children } = props
 
     const currency = process.env.NEXT_PUBLIC_CURRENCY
     const router = useRouter()
@@ -31,6 +38,7 @@ export const AppContextProvider = (props) => {
     const [suppliers, setSuppliers] = useState([])
     const [inventoryReceipts, setInventoryReceipts] = useState([])
 
+    const [productsLoading, setProductsLoading] = useState(false)
     const [categoriesLoading, setCategoriesLoading] = useState(false)
     const [sellerProductsLoading, setSellerProductsLoading] = useState(false)
     const [suppliersLoading, setSuppliersLoading] = useState(false)
@@ -39,10 +47,14 @@ export const AppContextProvider = (props) => {
     const [userData, setUserData] = useState(false)
     const [isSeller, setIsSeller] = useState(false)
     const [cartItems, setCartItems] = useState({})
-    const [favoriteIds, setFavoriteIds] = useState([])
+    const [favoriteIds, setFavoriteIds] = useState(() => normalizeFavoriteIds(initialFavoriteIds))
     const isMountedRef = useRef(true)
     const lastFavoriteMutationAtRef = useRef(0)
     const isAuthLoaded = isUserLoaded
+
+    useEffect(() => {
+        setFavoriteIds(normalizeFavoriteIds(initialFavoriteIds))
+    }, [initialFavoriteIds])
 
     useEffect(() => {
         getTokenRef.current = getToken
@@ -50,6 +62,7 @@ export const AppContextProvider = (props) => {
 
     const fetchProductData = async () => {
         try {
+            setProductsLoading(true)
             const { data } = await axios.get('/api/product/list')
             if (data.success) {
                 if (isMountedRef.current) {
@@ -60,6 +73,10 @@ export const AppContextProvider = (props) => {
             }
         } catch (error) {
             toast.error(error.message)
+        } finally {
+            if (isMountedRef.current) {
+                setProductsLoading(false)
+            }
         }
     }
 
@@ -441,6 +458,22 @@ export const AppContextProvider = (props) => {
     }, [])
 
     useEffect(() => {
+        // Keep SSR-seeded favorites until auth state is resolved to avoid white-heart flash.
+        if (!isAuthLoaded || typeof isSignedIn === 'undefined') {
+            return
+        }
+
+        if (isSignedIn === false) {
+            setIsSeller(false)
+            setUserData(false)
+            setCartItems({})
+            setFavoriteIds([])
+            setSellerProducts([])
+            setSuppliers([])
+            setInventoryReceipts([])
+            return
+        }
+
         if (userId) {
             fetchUserData(userRole)
 
@@ -452,22 +485,22 @@ export const AppContextProvider = (props) => {
 
             return
         }
-
-        setIsSeller(false)
-        setUserData(false)
-        setCartItems({})
-        setFavoriteIds([])
-        setSellerProducts([])
-        setSuppliers([])
-        setInventoryReceipts([])
-    }, [userId, userRole, fetchSellerProducts, fetchSuppliers, fetchInventoryReceipts])
+    }, [
+        isAuthLoaded,
+        isSignedIn,
+        userId,
+        userRole,
+        fetchSellerProducts,
+        fetchSuppliers,
+        fetchInventoryReceipts
+    ])
 
     const value = {
         user, getToken, isSignedIn, isAuthLoaded,
         currency, router,
         isSeller, setIsSeller,
         userData, fetchUserData,
-        products, fetchProductData,
+        products, fetchProductData, productsLoading,
         sellerProducts, fetchSellerProducts, sellerProductsLoading,
         categories, fetchCategories, categoriesLoading,
         suppliers, fetchSuppliers, suppliersLoading,
@@ -480,7 +513,7 @@ export const AppContextProvider = (props) => {
 
     return (
         <AppContext.Provider value={value}>
-            {props.children}
+            {children}
         </AppContext.Provider>
     )
 }
