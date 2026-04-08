@@ -14,7 +14,7 @@ const HomeProducts = ({ initialProducts = [], initialPagination }) => {
   const [hasMore, setHasMore] = React.useState(Boolean(initialPagination?.hasMore))
   const limit = Number.isFinite(initialPagination?.limit) ? initialPagination.limit : DEFAULT_LIMIT
 
-  const { products } = useAppContext()
+  const { products, productsLoading } = useAppContext()
 
   React.useEffect(() => {
     setDisplayProducts(initialProducts)
@@ -23,6 +23,15 @@ const HomeProducts = ({ initialProducts = [], initialPagination }) => {
   }, [initialProducts, initialPagination?.hasMore, initialPagination?.page])
 
   const visibleProducts = displayProducts.length > 0 ? displayProducts : products
+  const totalProducts = Number.isFinite(initialPagination?.total) ? initialPagination.total : null
+  const initialSkeletonCount = totalProducts === null
+    ? limit
+    : Math.max(0, Math.min(limit, totalProducts))
+  const remainingProducts = totalProducts === null
+    ? limit
+    : Math.max(0, totalProducts - visibleProducts.length)
+  const loadMoreSkeletonCount = Math.max(0, Math.min(limit, remainingProducts))
+  const shouldShowInitialSkeleton = visibleProducts.length === 0 && productsLoading && initialSkeletonCount > 0
 
   const loadMoreProducts = async () => {
     if (isLoadingMore || !hasMore) {
@@ -60,6 +69,32 @@ const HomeProducts = ({ initialProducts = [], initialPagination }) => {
       <p className="text-2xl font-medium text-left w-full">Sản phẩm phổ biến</p>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 flex-col items-center gap-6 mt-6 pb-14 w-full">
         {visibleProducts.map((product) => <ProductCard key={product._id} product={product} />)}
+
+        {shouldShowInitialSkeleton && Array.from({ length: initialSkeletonCount }).map((_, index) => (
+          <div
+            key={`home-initial-skeleton-${index}`}
+            className="w-full max-w-[200px] animate-pulse"
+          >
+            <div className="relative rounded-lg h-52 bg-gray-200" />
+            <div className="mt-3 h-4 rounded bg-gray-200" />
+            <div className="mt-2 h-3 w-2/3 rounded bg-gray-200" />
+            <div className="mt-2 h-3 w-5/6 rounded bg-gray-200" />
+            <div className="mt-3 h-5 w-1/2 rounded bg-gray-200" />
+          </div>
+        ))}
+
+        {isLoadingMore && Array.from({ length: loadMoreSkeletonCount }).map((_, index) => (
+          <div
+            key={`home-loadmore-skeleton-${currentPage}-${index}`}
+            className="w-full max-w-[200px] animate-pulse"
+          >
+            <div className="relative rounded-lg h-52 bg-gray-200" />
+            <div className="mt-3 h-4 rounded bg-gray-200" />
+            <div className="mt-2 h-3 w-2/3 rounded bg-gray-200" />
+            <div className="mt-2 h-3 w-5/6 rounded bg-gray-200" />
+            <div className="mt-3 h-5 w-1/2 rounded bg-gray-200" />
+          </div>
+        ))}
       </div>
 
       {hasMore && (

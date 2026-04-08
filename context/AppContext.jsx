@@ -38,6 +38,7 @@ export const AppContextProvider = (props) => {
     const [suppliers, setSuppliers] = useState([])
     const [inventoryReceipts, setInventoryReceipts] = useState([])
 
+    const [productsLoading, setProductsLoading] = useState(false)
     const [categoriesLoading, setCategoriesLoading] = useState(false)
     const [sellerProductsLoading, setSellerProductsLoading] = useState(false)
     const [suppliersLoading, setSuppliersLoading] = useState(false)
@@ -61,6 +62,7 @@ export const AppContextProvider = (props) => {
 
     const fetchProductData = async () => {
         try {
+            setProductsLoading(true)
             const { data } = await axios.get('/api/product/list')
             if (data.success) {
                 if (isMountedRef.current) {
@@ -71,6 +73,10 @@ export const AppContextProvider = (props) => {
             }
         } catch (error) {
             toast.error(error.message)
+        } finally {
+            if (isMountedRef.current) {
+                setProductsLoading(false)
+            }
         }
     }
 
@@ -494,7 +500,7 @@ export const AppContextProvider = (props) => {
         currency, router,
         isSeller, setIsSeller,
         userData, fetchUserData,
-        products, fetchProductData,
+        products, fetchProductData, productsLoading,
         sellerProducts, fetchSellerProducts, sellerProductsLoading,
         categories, fetchCategories, categoriesLoading,
         suppliers, fetchSuppliers, suppliersLoading,
