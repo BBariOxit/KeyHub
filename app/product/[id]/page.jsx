@@ -28,6 +28,7 @@ const Product = () => {
         averageRating: null,
         totalReviews: null
     })
+    const [buyNowProcessing, setBuyNowProcessing] = useState(false)
     const productData = useMemo(() => {
         return products.find((product) => product._id === id) || null;
     }, [products, id]);
@@ -77,6 +78,26 @@ const Product = () => {
 
         return []
     }, [productData?.specifications])
+    const normalizeSpecificationKey = (key) => String(key || '')
+        .replace(/Đ/g, 'D')
+        .replace(/đ/g, 'd')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '')
+    const specificationLookup = useMemo(() => {
+        return normalizedSpecifications.reduce((lookup, specification) => {
+            const normalizedKey = normalizeSpecificationKey(specification.key)
+
+            if (normalizedKey && !lookup[normalizedKey]) {
+                lookup[normalizedKey] = specification.value
+            }
+
+            return lookup
+        }, {})
+    }, [normalizedSpecifications])
+    const brandDisplay = specificationLookup.thuonghieu || 'Chưa cập nhật'
+    const backlightDisplay = specificationLookup.dennen || 'Chưa cập nhật'
     const visibleSpecifications = isSpecificationExpanded
         ? normalizedSpecifications
         : normalizedSpecifications.slice(0, SPECIFICATIONS_PREVIEW_LIMIT)
@@ -104,6 +125,26 @@ const Product = () => {
             totalReviews: null
         })
     }, [id])
+
+    const handleBuyNow = async () => {
+        if (isOutOfStock || buyNowProcessing) {
+            return
+        }
+
+        setBuyNowProcessing(true)
+        try {
+            if (!isCartAtStockLimit) {
+                const added = await addToCart(productData._id, { showToast: false })
+                if (!added) {
+                    return
+                }
+            }
+
+            router.push('/cart')
+        } finally {
+            setBuyNowProcessing(false)
+        }
+    }
 
     return productData ? (<>
         <Navbar />
@@ -174,11 +215,11 @@ const Product = () => {
                             <tbody>
                                 <tr>
                                     <td className="text-gray-600 font-medium whitespace-nowrap w-28 pr-5">Thương hiệu</td>
-                                    <td className="text-gray-800/50 pl-5">KeyHub</td>
+                                    <td className="text-gray-800/50 pl-5">{brandDisplay}</td>
                                 </tr>
                                 <tr>
-                                    <td className="text-gray-600 font-medium whitespace-nowrap w-28 pr-5">Màu sắc</td>
-                                    <td className="text-gray-800/50 pl-5">Nhiều màu</td>
+                                    <td className="text-gray-600 font-medium whitespace-nowrap w-28 pr-5">Đèn nền</td>
+                                    <td className="text-gray-800/50 pl-5">{backlightDisplay}</td>
                                 </tr>
                                 <tr>
                                     <td className="text-gray-600 font-medium whitespace-nowrap w-28 pr-5">Danh mục</td>
@@ -205,11 +246,11 @@ const Product = () => {
                             {isOutOfStock ? 'Hết hàng' : isCartAtStockLimit ? 'Đã thêm tối đa' : 'Thêm vào giỏ'}
                         </button>
                         <button
-                            onClick={() => router.push('/cart')}
-                            disabled={isOutOfStock}
-                            className={`w-full py-3.5 transition ${isOutOfStock ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'bg-orange-500 text-white hover:bg-orange-600'}`}
+                            onClick={handleBuyNow}
+                            disabled={isOutOfStock || buyNowProcessing}
+                            className={`w-full py-3.5 transition ${(isOutOfStock || buyNowProcessing) ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'bg-orange-500 text-white hover:bg-orange-600'}`}
                         >
-                            {isOutOfStock ? 'Hết hàng' : 'Mua ngay'}
+                            {isOutOfStock ? 'Hết hàng' : buyNowProcessing ? 'Đang xử lý...' : 'Mua ngay'}
                         </button>
                     </div>
                 </div>
@@ -238,7 +279,7 @@ const Product = () => {
                                 {visibleSpecifications.length > 0 ? (
                                     visibleSpecifications.map((specification, index) => (
                                         <tr key={`${specification.key}-${index}`} className={index % 2 === 0 ? 'bg-gray-50/60' : ''}>
-                                            <td className="text-gray-700 font-medium whitespace-nowrap w-36 px-4 py-3">{specification.key}</td>
+                                            <td className="text-gray-700 font-medium whitespace-normal break-words w-36 px-4 py-3">{specification.key}</td>
                                             <td className="text-gray-700 px-4 py-3">{specification.value}</td>
                                         </tr>
                                     ))

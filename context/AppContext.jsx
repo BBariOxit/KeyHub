@@ -47,6 +47,7 @@ export const AppContextProvider = (props) => {
     const [userData, setUserData] = useState(false)
     const [isSeller, setIsSeller] = useState(false)
     const [cartItems, setCartItems] = useState({})
+    const cartItemsRef = useRef({})
     const [favoriteIds, setFavoriteIds] = useState(() => normalizeFavoriteIds(initialFavoriteIds))
     const isMountedRef = useRef(true)
     const lastFavoriteMutationAtRef = useRef(0)
@@ -59,6 +60,10 @@ export const AppContextProvider = (props) => {
     useEffect(() => {
         getTokenRef.current = getToken
     }, [getToken])
+
+    useEffect(() => {
+        cartItemsRef.current = cartItems
+    }, [cartItems])
 
     const fetchProductData = async () => {
         try {
@@ -275,7 +280,7 @@ export const AppContextProvider = (props) => {
     }
 
     const debouncedSyncCart = useCallback(
-        // sử dụng debounce tránh sapm click
+        // sử dụng debounce tránh spam click
         debounce(async (cartData, oldData) => {
             try {
                 const token = await getTokenRef.current?.()
@@ -310,8 +315,8 @@ export const AppContextProvider = (props) => {
         const product = products.find((item) => item._id === itemId)
         const maxStock = Number.isFinite(product?.stock) ? Math.max(0, product.stock) : null
 
-        const oldCartItems = structuredClone(cartItems)
-        let cartData = structuredClone(cartItems);
+        const oldCartItems = structuredClone(cartItemsRef.current)
+        const cartData = structuredClone(cartItemsRef.current)
 
         const currentQuantity = cartData[itemId] || 0
         const nextQuantity = maxStock === null
@@ -327,6 +332,7 @@ export const AppContextProvider = (props) => {
         }
 
         cartData[itemId] = nextQuantity
+        cartItemsRef.current = cartData
         setCartItems(cartData)
         if (showToast) {
             toast.success('Sản phẩm đã được thêm vào giỏ hàng')
@@ -407,8 +413,8 @@ export const AppContextProvider = (props) => {
 
     const updateCartQuantity = async (itemId, quantity, options = {}) => {
         const { showToast = false } = options
-        const oldCartItems = structuredClone(cartItems)
-        let cartData = structuredClone(cartItems)
+        const oldCartItems = structuredClone(cartItemsRef.current)
+        const cartData = structuredClone(cartItemsRef.current)
 
         const parsedQuantity = Number.isFinite(quantity) ? Math.floor(quantity) : 0
         const product = products.find((item) => item._id === itemId)
@@ -422,6 +428,7 @@ export const AppContextProvider = (props) => {
         } else {
             cartData[itemId] = safeQuantity
         }
+        cartItemsRef.current = cartData
         setCartItems(cartData)
         if (showToast) {
             toast.success('Giỏ hàng đã được cập nhật')
