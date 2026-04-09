@@ -3,6 +3,7 @@ import authSeller from "@/lib/authSeller";
 import Category from "@/models/Category";
 import Product from "@/models/Product";
 import { getAuth } from "@clerk/nextjs/server";
+import { v2 as cloudinary } from "cloudinary";
 import { NextResponse } from "next/server";
 import z from "zod";
 
@@ -49,6 +50,30 @@ const specificationSchema = z.object({
   key: z.string().trim().min(1, "Tên thông số không được để trống").max(80, "Tên thông số quá dài"),
   value: z.string().trim().min(1, "Giá trị thông số không được để trống").max(300, "Giá trị thông số quá dài"),
 });
+
+const normalizeImageListInput = (value) => {
+  if (value == null || value === "") {
+    return undefined;
+  }
+
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
+    } catch {
+      return [value];
+    }
+    return [value];
+  }
+
+  return value;
+};
 
 const productUpdateSchema = z
   .object({
@@ -102,6 +127,10 @@ const productUpdateSchema = z
       (value) => (value == null || value === "" ? undefined : value),
       z.coerce.number().int("Tồn kho phải là số nguyên").min(0, "Tồn kho không được âm").optional()
     ),
+    existingImages: z.preprocess(
+      normalizeImageListInput,
+      z.array(z.string().trim().min(1, "Ảnh không hợp lệ").max(2000, "Đường dẫn ảnh quá dài")).optional()
+    ),
   })
   .superRefine((data, ctx) => {
     const hasUpdatableField = [
@@ -115,6 +144,7 @@ const productUpdateSchema = z
       "price",
       "offerPrice",
       "stock",
+      "existingImages",
     ].some((field) => Object.prototype.hasOwnProperty.call(data, field) && data[field] !== undefined);
 
     if (!hasUpdatableField) {
@@ -143,6 +173,8 @@ const parseRequestPayload = async (req) => {
       price: formData.get("price"),
       offerPrice: formData.get("offerPrice"),
       stock: formData.get("stock"),
+      existingImages: formData.getAll("existingImages"),
+      images: formData.getAll("images"),
     };
   }
 
@@ -159,8 +191,16 @@ const parseRequestPayload = async (req) => {
     price: body?.price,
     offerPrice: body?.offerPrice,
     stock: body?.stock,
+    existingImages: body?.existingImages,
+    images: body?.images,
   };
 };
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export async function POST(req) {
   try {
@@ -205,6 +245,7 @@ export async function POST(req) {
       price,
       offerPrice,
       stock,
+      existingImages,
     } = validation.data;
 
     const existingProduct = await Product.findOne({ _id: productId, userId }).select("price offerPrice").lean();
@@ -221,6 +262,53 @@ export async function POST(req) {
     if (stock !== undefined) updatePayload.stock = stock;
     if (price !== undefined) updatePayload.price = price;
     if (offerPrice !== undefined) updatePayload.offerPrice = offerPrice;
+
+    const nextExistingImages = Array.isArray(existingImages) ? existingImages : undefined;
+    const incomingImageFiles = Array.isArray(payload.images)
+      ? payload.images.filter((file) => file && typeof file.arrayBuffer === "function" && file.size > 0)
+      : [];
+
+    if (nextExistingImages !== undefined || incomingImageFiles.length > 0) {
+      const uploadedImages = await Promise.all(
+        incomingImageFiles.map(async (file) => {
+          const arrayBuffer = await file.arrayBuffer();
+          const buffer = Buffer.from(arrayBuffer);
+
+          return new Promise((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream(
+              { resource_type: "auto" },
+              (error, result) => {
+                if (error) {
+                  reject(error);
+                } else {
+                  resolve(result?.secure_url || "");
+                }
+              }
+            );
+
+            stream.end(buffer);
+          });
+        })
+      );
+
+      const nextImages = [
+        ...(nextExistingImages || []),
+        ...uploadedImages.filter(Boolean),
+      ];
+
+      if (nextImages.length === 0) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Dữ liệu cập nhật không hợp lệ.",
+            errors: [{ path: "images", message: "Sản phẩm cần ít nhất một ảnh" }],
+          },
+          { status: 400 }
+        );
+      }
+
+      updatePayload.image = nextImages;
+    }
 
     const nextPrice = price !== undefined ? price : existingProduct.price;
     const nextOfferPrice = offerPrice !== undefined ? offerPrice : existingProduct.offerPrice;
