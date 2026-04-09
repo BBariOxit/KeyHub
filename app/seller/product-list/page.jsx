@@ -1,6 +1,5 @@
 'use client'
 import React, { useCallback, useEffect, useState } from "react";
-import { assets } from "@/assets/assets";
 import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
 import Footer from "@/components/seller/Footer";
@@ -10,6 +9,7 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { formatVnd } from "@/lib/price";
 import { optimizeCloudinaryImage } from "@/lib/image";
+import { Eye, Pencil } from "lucide-react";
 
 const ProductList = () => {
 
@@ -24,7 +24,6 @@ const ProductList = () => {
       const { data } = await axios.get('/api/product/seller-list', { headers: { Authorization: `Bearer ${token}` }})
       if (data.success) {
         setProducts(data.products)
-        setLoading(false)
       } else {
         toast.error(data.message)
       }
@@ -101,14 +100,24 @@ const ProductList = () => {
                   </td>
                   <td className="px-4 py-3">{formatVnd(product.offerPrice)} VND</td>
                   <td className="px-4 py-3 max-sm:hidden text-center">
-                    <Link href={`/product/${product._id}`} className="inline-flex items-center gap-1 px-1.5 md:px-3.5 py-2 bg-orange-600 text-white rounded-md">
-                      <span className="hidden md:block">Xem</span>
-                      <Image
-                        className="h-3.5"
-                        src={assets.redirect_icon}
-                        alt="redirect_icon"
-                      />
-                    </Link>
+                    <div className="inline-flex items-center gap-2">
+                      <Link
+                        href={`/product/${product._id}`}
+                        className="inline-flex items-center justify-center w-9 h-9 rounded-md border border-orange-200 text-orange-600 hover:bg-orange-50"
+                        aria-label="Xem sản phẩm"
+                        title="Xem"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Link>
+                      <Link
+                        href={`/seller/products/${product._id}/edit`}
+                        className="inline-flex items-center justify-center w-9 h-9 rounded-md border border-blue-200 text-blue-600 hover:bg-blue-50"
+                        aria-label="Sửa sản phẩm"
+                        title="Sửa"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}
