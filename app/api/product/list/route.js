@@ -33,6 +33,8 @@ export async function GET(req) {
         ...categoryProjection,
         category: 1,
         stock: 1,
+        averageRating: 1,
+        totalReviews: 1,
         timestamp: 1,
       }
     )

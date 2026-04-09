@@ -2,6 +2,9 @@ import { Inngest } from "inngest";
 import connectDB from "./db";
 import User from "@/models/User";
 import Order from "@/models/Order";
+import Product from "@/models/Product";
+import Review from "@/models/Review";
+import mongoose from "mongoose";
 
 // Create a client to send and receive events
 export const inngest = new Inngest({ id: "keyhub" });
@@ -109,5 +112,61 @@ export const createUserOrder = inngest.createFunction(
     })
     
     return { success: true, processed: orders.length }
+  }
+)
+
+// inngest func to recompute product rating summary when review changes
+export const syncProductReviewSummary = inngest.createFunction(
+  {
+    id: 'sync-product-review-summary'
+  },
+  {
+    event: 'product/review.changed'
+  },
+  async ({ event, step }) => {
+    const rawProductId = String(event?.data?.productId || '')
+
+    if (!mongoose.Types.ObjectId.isValid(rawProductId)) {
+      return { success: false, reason: 'invalid-product-id' }
+    }
+
+    const productId = new mongoose.Types.ObjectId(rawProductId)
+
+    await step.run('connect-to-db', async () => {
+      await connectDB()
+    })
+
+    const summary = await step.run('aggregate-product-review-summary', async () => {
+      const [stats] = await Review.aggregate([
+        { $match: { productId } },
+        {
+          $group: {
+            _id: '$productId',
+            averageRating: { $avg: '$rating' },
+            totalReviews: { $sum: 1 }
+          }
+        }
+      ])
+
+      const averageRating = Number.isFinite(stats?.averageRating)
+        ? Number(stats.averageRating.toFixed(2))
+        : 0
+      const totalReviews = Number.isFinite(stats?.totalReviews)
+        ? stats.totalReviews
+        : 0
+
+      return { averageRating, totalReviews }
+    })
+
+    await step.run('update-product-rating-summary', async () => {
+      await Product.findByIdAndUpdate(rawProductId, {
+        $set: {
+          averageRating: summary.averageRating,
+          totalReviews: summary.totalReviews
+        }
+      })
+    })
+
+    return { success: true, productId: rawProductId, ...summary }
   }
 )
