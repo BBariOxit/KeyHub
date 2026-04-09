@@ -164,25 +164,26 @@ const ProductForm = ({
   const numericOfferPrice = Number(getNumericString(offerPrice) || 0)
   const stockNumber = Math.max(0, Number(stock || 0))
   const stockStatus = stockNumber <= 0 ? 'Hết hàng' : stockNumber <= 2 ? `Sắp hết (${stockNumber})` : `Còn ${stockNumber}`
+  const [previewUrls, setPreviewUrls] = useState([])
 
-  const previewUrls = useMemo(() => {
-    return imageSlots.map((slot) => {
+  useEffect(() => {
+    const nextUrls = imageSlots.map((slot) => {
       if (!slot) return null
       if (slot.type === 'url') return slot.value
       if (slot.type === 'file') return URL.createObjectURL(slot.value)
       return null
     })
-  }, [imageSlots])
 
-  useEffect(() => {
+    setPreviewUrls(nextUrls)
+
     return () => {
-      previewUrls.forEach((url) => {
+      nextUrls.forEach((url) => {
         if (url && url.startsWith('blob:')) {
           URL.revokeObjectURL(url)
         }
       })
     }
-  }, [previewUrls])
+  }, [imageSlots])
 
   const previewImage = previewUrls.find(Boolean) || assets.upload_area
 

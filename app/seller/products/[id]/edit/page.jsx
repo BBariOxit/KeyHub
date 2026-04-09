@@ -18,13 +18,23 @@ const EditProductPage = () => {
   const [submitting, setSubmitting] = useState(false)
   const [product, setProduct] = useState(null)
 
-  const fetchProductDetail = useCallback(async () => {
+  const fetchProductDetail = useCallback(async (signal) => {
     try {
       setLoading(true)
       const token = await getToken()
+
+      if (signal?.aborted) {
+        return
+      }
+
       const { data } = await axios.get(`/api/product/seller-detail/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
+        signal
       })
+
+      if (signal?.aborted) {
+        return
+      }
 
       if (!data.success) {
         toast.error(data.message || 'Không thể tải thông tin sản phẩm')
@@ -34,16 +44,26 @@ const EditProductPage = () => {
 
       setProduct(data.product)
     } catch (error) {
+      if (error?.code === 'ERR_CANCELED') {
+        return
+      }
       toast.error(error.response?.data?.message || error.message)
       router.push('/seller/product-list')
     } finally {
-      setLoading(false)
+      if (!signal?.aborted) {
+        setLoading(false)
+      }
     }
   }, [getToken, id, router])
 
   useEffect(() => {
-    if (user) {
-      fetchProductDetail()
+    if (!user) return
+
+    const controller = new AbortController()
+    fetchProductDetail(controller.signal)
+
+    return () => {
+      controller.abort()
     }
   }, [user, fetchProductDetail])
 

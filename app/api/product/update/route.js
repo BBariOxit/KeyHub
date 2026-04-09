@@ -75,6 +75,28 @@ const normalizeImageListInput = (value) => {
   return value;
 };
 
+const MAX_IMAGE_FILE_SIZE_BYTES = 10 * 1024 * 1024;
+
+const uploadImageToCloudinary = async (file) => {
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { resource_type: "auto" },
+      (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result?.secure_url || "");
+        }
+      }
+    );
+
+    stream.end(buffer);
+  });
+};
+
 const productUpdateSchema = z
   .object({
     productId: objectIdSchema,
@@ -268,28 +290,27 @@ export async function POST(req) {
       ? payload.images.filter((file) => file && typeof file.arrayBuffer === "function" && file.size > 0)
       : [];
 
-    if (nextExistingImages !== undefined || incomingImageFiles.length > 0) {
-      const uploadedImages = await Promise.all(
-        incomingImageFiles.map(async (file) => {
-          const arrayBuffer = await file.arrayBuffer();
-          const buffer = Buffer.from(arrayBuffer);
-
-          return new Promise((resolve, reject) => {
-            const stream = cloudinary.uploader.upload_stream(
-              { resource_type: "auto" },
-              (error, result) => {
-                if (error) {
-                  reject(error);
-                } else {
-                  resolve(result?.secure_url || "");
-                }
-              }
-            );
-
-            stream.end(buffer);
-          });
-        })
+    const hasOversizedImage = incomingImageFiles.some((file) => Number(file.size || 0) > MAX_IMAGE_FILE_SIZE_BYTES);
+    if (hasOversizedImage) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Dữ liệu cập nhật không hợp lệ.",
+          errors: [{ path: "images", message: "Mỗi ảnh phải nhỏ hơn hoặc bằng 10MB" }],
+        },
+        { status: 400 }
       );
+    }
+
+    if (nextExistingImages !== undefined || incomingImageFiles.length > 0) {
+      const uploadedImages = [];
+
+      for (const file of incomingImageFiles) {
+        const secureUrl = await uploadImageToCloudinary(file);
+        if (secureUrl) {
+          uploadedImages.push(secureUrl);
+        }
+      }
 
       const nextImages = [
         ...(nextExistingImages || []),
