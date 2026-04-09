@@ -13,7 +13,13 @@ const ProductCard = ({ product }) => {
 
     const { currency, isFavorite, toggleFavorite } = useAppContext()
     const [favoriteLoading, setFavoriteLoading] = useState(false)
-    const rating = Number.isFinite(product?.rating) ? product.rating : 4.5
+    const normalizedAverageRating = Number.isFinite(product?.averageRating)
+        ? Math.min(5, Math.max(0, product.averageRating))
+        : 0
+    const totalReviews = Number.isFinite(product?.totalReviews)
+        ? Math.max(0, product.totalReviews)
+        : 0
+    const rating = totalReviews > 0 ? normalizedAverageRating : 0
     const cardImage = optimizeCloudinaryImage(product?.image?.[0], { width: 420, quality: 'auto' })
     const stock = Number.isFinite(product?.stock) ? product.stock : 0
     const isOutOfStock = stock <= 0
@@ -82,7 +88,7 @@ const ProductCard = ({ product }) => {
             <p className="w-full text-[11px] text-gray-500 truncate">{categoryLabel}</p>
             <p className="w-full text-xs text-gray-500/70 max-sm:hidden truncate">{product.description}</p>
             <div className="flex items-center gap-2">
-                <p className="text-xs">{rating}</p>
+                <p className="text-xs">{rating.toFixed(1)}</p>
                 <div className="flex items-center gap-0.5">
                     {STAR_INDICES.map((index) => (
                         <Image
@@ -97,6 +103,7 @@ const ProductCard = ({ product }) => {
                         />
                     ))}
                 </div>
+                <p className="text-[11px] text-gray-500">({totalReviews})</p>
             </div>
 
             <div className="flex items-end justify-between w-full mt-1">

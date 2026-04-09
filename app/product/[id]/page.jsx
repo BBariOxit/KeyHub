@@ -76,6 +76,12 @@ const Product = () => {
         ? normalizedSpecifications
         : normalizedSpecifications.slice(0, SPECIFICATIONS_PREVIEW_LIMIT)
     const hasMoreSpecifications = normalizedSpecifications.length > SPECIFICATIONS_PREVIEW_LIMIT
+    const averageRating = Number.isFinite(productData?.averageRating)
+        ? Math.min(5, Math.max(0, productData.averageRating))
+        : 0
+    const totalReviews = Number.isFinite(productData?.totalReviews)
+        ? Math.max(0, productData.totalReviews)
+        : 0
 
     useEffect(() => {
         setMainImage(null)
@@ -132,17 +138,16 @@ const Product = () => {
                     </h1>
                     <div className="flex items-center gap-2">
                         <div className="flex items-center gap-0.5">
-                            <Image className="h-4 w-4" src={assets.star_icon} alt="star_icon" />
-                            <Image className="h-4 w-4" src={assets.star_icon} alt="star_icon" />
-                            <Image className="h-4 w-4" src={assets.star_icon} alt="star_icon" />
-                            <Image className="h-4 w-4" src={assets.star_icon} alt="star_icon" />
-                            <Image
-                                className="h-4 w-4"
-                                src={assets.star_dull_icon}
-                                alt="star_dull_icon"
-                            />
+                            {[0, 1, 2, 3, 4].map((index) => (
+                                <Image
+                                    key={index}
+                                    className="h-4 w-4"
+                                    src={index < Math.floor(averageRating) ? assets.star_icon : assets.star_dull_icon}
+                                    alt="star_icon"
+                                />
+                            ))}
                         </div>
-                        <p>(4.5)</p>
+                        <p>({averageRating.toFixed(1)} - {totalReviews} đánh giá)</p>
                     </div>
                     <p className="text-gray-600 mt-3">
                         {productData.description}
