@@ -39,7 +39,7 @@ export async function POST(req) {
     await connectDB()
 
     const productIds = Object.keys(cleanCartData)
-    const products = await Product.find({ _id: { $in: productIds } }).select('_id stock').lean()
+    const products = await Product.find({ _id: { $in: productIds }, isVisible: { $ne: false } }).select('_id stock').lean()
 
     const stockMap = new Map(
       products.map((product) => [String(product._id), Number.isFinite(product.stock) ? Math.max(0, product.stock) : null])

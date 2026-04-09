@@ -22,6 +22,11 @@ const productSchema = new mongoose.Schema({
   offerPrice: { type: Number, required: true },
   image: { type: [String], required: true },
   categoryIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'category' }],
+  isVisible: {
+    type: Boolean,
+    default: true,
+    index: true
+  },
   stock: {
     type: Number,
     required: true,

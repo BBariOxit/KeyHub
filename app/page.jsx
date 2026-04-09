@@ -9,7 +9,8 @@ import Footer from "@/components/Footer";
 import connectDB from "@/config/db";
 import Product from "@/models/Product";
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 const HOME_PRODUCTS_PER_PAGE = 15
 
 async function getInitialProductsPage() {
@@ -20,8 +21,10 @@ async function getInitialProductsPage() {
     const categoryProjection = hasMultiCategorySchema ? { categoryIds: 1 } : { categoryId: 1 }
     const populatePath = hasMultiCategorySchema ? 'categoryIds' : 'categoryId'
 
+    const storefrontFilter = { isVisible: { $ne: false } }
+
     const productDocs = await Product.find(
-      {},
+      storefrontFilter,
       {
         name: 1,
         description: 1,
@@ -41,7 +44,7 @@ async function getInitialProductsPage() {
       .limit(HOME_PRODUCTS_PER_PAGE)
       .lean();
 
-    const total = await Product.countDocuments({})
+    const total = await Product.countDocuments(storefrontFilter)
 
     const normalizedProducts = productDocs.map((product) => {
       const populatedCategoryDocs = hasMultiCategorySchema

@@ -2,7 +2,8 @@ import connectDB from "@/config/db";
 import Product from "@/models/Product";
 import { NextResponse } from "next/server";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url)
@@ -20,8 +21,10 @@ export async function GET(req) {
     const categoryProjection = hasMultiCategorySchema ? { categoryIds: 1 } : { categoryId: 1 }
     const populatePath = hasMultiCategorySchema ? 'categoryIds' : 'categoryId'
 
+    const storefrontFilter = { isVisible: { $ne: false } }
+
     let productsQuery = Product.find(
-      {},
+      storefrontFilter,
       {
         name: 1,
         description: 1,
@@ -32,6 +35,7 @@ export async function GET(req) {
         image: 1,
         ...categoryProjection,
         category: 1,
+        isVisible: 1,
         stock: 1,
         averageRating: 1,
         totalReviews: 1,
@@ -87,7 +91,7 @@ export async function GET(req) {
     })
 
     if (usePagination) {
-      const total = await Product.countDocuments({})
+      const total = await Product.countDocuments(storefrontFilter)
       const hasMore = page * limit < total
 
       return NextResponse.json({
