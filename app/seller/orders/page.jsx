@@ -56,12 +56,18 @@ const Orders = () => {
                         </span>
                     </div>
                     <div className="max-w-6xl space-y-4">
-                        <div className="hidden md:grid md:grid-cols-[2.3fr_1.45fr_1.15fr_1.45fr] gap-5 px-4 text-xs font-semibold uppercase tracking-wide text-gray-500">
-                            <p>Sản phẩm</p>
-                            <p>Thông tin nhận hàng</p>
-                            <p>Tổng tiền</p>
-                            <p>Thanh toán</p>
-                        </div>
+                        {orders.length === 0 ? (
+                            <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-10 text-center text-gray-500">
+                                Không có đơn hàng nào
+                            </div>
+                        ) : (
+                            <>
+                                <div className="hidden md:grid md:grid-cols-[2.3fr_1.45fr_1.15fr_1.45fr] gap-5 px-4 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                    <p>Sản phẩm</p>
+                                    <p>Thông tin nhận hàng</p>
+                                    <p>Tổng tiền</p>
+                                    <p>Thanh toán</p>
+                                </div>
                     {orders.map((order, index) => (
                             <div key={order._id || index} className="grid grid-cols-1 md:grid-cols-[2.3fr_1.45fr_1.15fr_1.45fr] gap-5 md:gap-x-7 md:gap-y-6 p-6 border border-gray-200 rounded-2xl md:items-center bg-white shadow-sm hover:shadow-md transition-shadow">
                                 <div className="flex items-center gap-5 md:gap-6 min-w-0">
@@ -101,7 +107,9 @@ const Orders = () => {
                                 </p>
                             </div>
                         </div>
-                    ))}
+                        ))}
+                            </>
+                        )}
                 </div>
             </div>}
             <Footer />

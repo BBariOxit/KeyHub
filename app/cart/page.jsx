@@ -58,6 +58,7 @@ const Cart = () => {
                 {cartProductRows.map(({ itemId, product, quantity }) => {
                   const maxStock = Number.isFinite(product?.stock) ? Math.max(0, product.stock) : null
                   const canIncrease = maxStock === null || quantity < maxStock
+                  const cartImage = optimizeCloudinaryImage(product?.image?.[0], { width: 160, quality: "auto" }) || product?.image?.[0] || assets.upload_area
 
                   return (
                     <tr key={itemId}>
@@ -65,13 +66,14 @@ const Cart = () => {
                         <div>
                           <div className="rounded-lg overflow-hidden bg-gray-500/10 p-2">
                             <Image
-                              src={optimizeCloudinaryImage(product.image[0], { width: 160, quality: "auto" }) || product.image[0]}
+                              src={cartImage}
                               alt={product.name}
                               className="w-16 h-auto object-cover mix-blend-multiply"
                               width={1280}
                               height={720}
                               sizes="64px"
                               loading="lazy"
+                              unoptimized
                             />
                           </div>
                           <button

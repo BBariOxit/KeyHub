@@ -8,6 +8,7 @@ import { formatThousandsInput, formatVnd, getNumericString } from '@/lib/price'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import toast from 'react-hot-toast'
+import { useFieldArray, useForm } from 'react-hook-form'
 
 const RichTextControlButton = ({ isActive, onClick, label }) => (
   <button
@@ -73,7 +74,6 @@ const ProductForm = ({
   const [name, setName] = useState(initialData?.name || '')
   const [description, setDescription] = useState(initialData?.description || '')
   const [detailedDescription, setDetailedDescription] = useState(initialData?.detailedDescription || '')
-  const [specifications, setSpecifications] = useState(() => mapInitialSpecifications(initialData?.specifications))
   const [categoryIds, setCategoryIds] = useState(() => {
     const ids = Array.isArray(initialData?.categoryIds)
       ? initialData.categoryIds.map((item) => String(item?._id || item)).filter(Boolean)
@@ -85,8 +85,21 @@ const ProductForm = ({
   const [stock, setStock] = useState(initialData?.stock != null ? String(initialData.stock) : '0')
   const [categoryMenuOpen, setCategoryMenuOpen] = useState(false)
   const [fieldErrors, setFieldErrors] = useState({})
+  const initializedProductIdRef = useRef('')
 
   const categoryRef = useRef(null)
+
+  const specificationForm = useForm({
+    defaultValues: {
+      specifications: mapInitialSpecifications(initialData?.specifications)
+    }
+  })
+
+  const { control, register, reset, getValues } = specificationForm
+  const { fields: specificationFields, append, remove, replace } = useFieldArray({
+    control,
+    name: 'specifications'
+  })
 
   const detailedDescriptionEditor = useEditor({
     immediatelyRender: false,
@@ -130,6 +143,11 @@ const ProductForm = ({
   useEffect(() => {
     if (!initialData) return
 
+    const incomingProductId = String(initialData?._id || '')
+    if (mode === 'edit' && incomingProductId && initializedProductIdRef.current === incomingProductId) {
+      return
+    }
+
     const nextCategoryIds = Array.isArray(initialData?.categoryIds)
       ? initialData.categoryIds.map((item) => String(item?._id || item)).filter(Boolean)
       : []
@@ -138,7 +156,9 @@ const ProductForm = ({
     setName(initialData?.name || '')
     setDescription(initialData?.description || '')
     setDetailedDescription(initialData?.detailedDescription || '')
-    setSpecifications(mapInitialSpecifications(initialData?.specifications))
+    reset({
+      specifications: mapInitialSpecifications(initialData?.specifications)
+    })
     setCategoryIds(nextCategoryIds)
     setPrice(initialData?.price != null ? String(initialData.price) : '')
     setOfferPrice(initialData?.offerPrice != null ? String(initialData.offerPrice) : '')
@@ -148,7 +168,11 @@ const ProductForm = ({
     if (detailedDescriptionEditor) {
       detailedDescriptionEditor.commands.setContent(initialData?.detailedDescription || '')
     }
-  }, [initialData, detailedDescriptionEditor])
+
+    if (mode === 'edit' && incomingProductId) {
+      initializedProductIdRef.current = incomingProductId
+    }
+  }, [mode, initialData, detailedDescriptionEditor, reset])
 
   const selectedCategories = useMemo(() => {
     if (!Array.isArray(categories) || categories.length === 0) return []
@@ -186,23 +210,6 @@ const ProductForm = ({
   }, [imageSlots])
 
   const previewImage = previewUrls.find(Boolean) || assets.upload_area
-
-  const normalizedSpecifications = useMemo(() => {
-    return specifications
-      .map((item) => ({
-        key: item.key.trim(),
-        value: item.value.trim()
-      }))
-      .filter((item) => item.key && item.value)
-  }, [specifications])
-
-  const hasIncompleteSpecification = useMemo(() => {
-    return specifications.some((item) => {
-      const hasKey = item.key.trim() !== ''
-      const hasValue = item.value.trim() !== ''
-      return hasKey !== hasValue
-    })
-  }, [specifications])
 
   const clearError = (fieldName) => {
     setFieldErrors((prev) => {
@@ -255,32 +262,82 @@ const ProductForm = ({
     clearError('images')
   }
 
-  const handleSpecificationChange = (index, field, nextValue) => {
-    setSpecifications((prev) => prev.map((item, itemIndex) => (
-      itemIndex === index
-        ? { ...item, [field]: nextValue }
-        : item
-    )))
-    clearError('specifications')
-  }
-
   const addSpecificationRow = () => {
-    if (specifications.length >= 50) {
+    if (specificationFields.length >= 50) {
       toast.error('Tối đa 50 thông số kỹ thuật')
       return
     }
 
-    setSpecifications((prev) => [...prev, createEmptySpecification()])
+    append(createEmptySpecification())
+    clearError('specifications')
   }
 
   const removeSpecificationRow = (index) => {
-    setSpecifications((prev) => {
-      if (prev.length <= 1) {
-        return [createEmptySpecification()]
-      }
-      return prev.filter((_, itemIndex) => itemIndex !== index)
-    })
+    if (specificationFields.length <= 1) {
+      replace([createEmptySpecification()])
+      clearError('specifications')
+      return
+    }
+
+    remove(index)
     clearError('specifications')
+  }
+
+  const parseBulkSpecifications = (pasteData) => {
+    const rows = String(pasteData || '').split(/\r?\n/)
+    return rows
+      .map((row) => row.trim())
+      .filter(Boolean)
+      .map((row) => {
+        const match = row.match(/^([^=:\t]+)[=:\t](.*)$/)
+        if (!match) return null
+        return {
+          key: match[1].trim(),
+          value: match[2].trim()
+        }
+      })
+      .filter((item) => item && item.key && item.value)
+  }
+
+  const handleSpecificationPaste = (event) => {
+    const pasteData = event.clipboardData.getData('text')
+    const isBulkData = pasteData.includes('\n') || pasteData.includes('=') || pasteData.includes(':') || pasteData.includes('\t')
+
+    if (!isBulkData) {
+      return
+    }
+
+    const parsedRows = parseBulkSpecifications(pasteData)
+    if (parsedRows.length === 0) {
+      return
+    }
+
+    event.preventDefault()
+    clearError('specifications')
+
+    const currentSpecs = getValues('specifications') || []
+    const hasOnlyEmptySpecification = currentSpecs.length === 1
+      && !String(currentSpecs[0]?.key || '').trim()
+      && !String(currentSpecs[0]?.value || '').trim()
+
+    if (hasOnlyEmptySpecification) {
+      replace(parsedRows.slice(0, 50))
+      if (parsedRows.length > 50) {
+        toast.error('Chỉ dán tối đa 50 thông số kỹ thuật')
+      }
+      return
+    }
+
+    const remainingSlots = Math.max(0, 50 - currentSpecs.length)
+    if (remainingSlots === 0) {
+      toast.error('Đã đạt tối đa 50 thông số kỹ thuật')
+      return
+    }
+
+    append(parsedRows.slice(0, remainingSlots))
+    if (parsedRows.length > remainingSlots) {
+      toast.error('Chỉ dán tối đa 50 thông số kỹ thuật')
+    }
   }
 
   const handleSubmit = async (event) => {
@@ -297,10 +354,24 @@ const ProductForm = ({
       return
     }
 
+    const specificationValues = getValues('specifications') || []
+    const hasIncompleteSpecification = specificationValues.some((item) => {
+      const hasKey = String(item?.key || '').trim() !== ''
+      const hasValue = String(item?.value || '').trim() !== ''
+      return hasKey !== hasValue
+    })
+
     if (hasIncompleteSpecification) {
       setFieldErrors({ specifications: 'Mỗi dòng thông số cần nhập đủ cả tên và giá trị' })
       return
     }
+
+    const normalizedSpecifications = specificationValues
+      .map((item) => ({
+        key: String(item?.key || '').trim(),
+        value: String(item?.value || '').trim()
+      }))
+      .filter((item) => item.key && item.value)
 
     const existingImages = imageSlots
       .filter((slot) => slot?.type === 'url')
@@ -471,21 +542,20 @@ const ProductForm = ({
           <label className="text-base font-medium">Thông số kỹ thuật</label>
 
           <div className="space-y-2 rounded border border-gray-500/40 p-3 bg-gray-50/40">
-            {specifications.map((spec, index) => (
-              <div key={`spec-${index}`} className="grid grid-cols-1 md:grid-cols-[minmax(0,180px)_minmax(0,1fr)_90px] gap-2 items-center">
+            {specificationFields.map((field, index) => (
+              <div key={field.id} className="grid grid-cols-1 md:grid-cols-[minmax(0,180px)_minmax(0,1fr)_90px] gap-2 items-center">
                 <input
                   type="text"
                   placeholder="Tên thông số"
                   className="outline-none py-2 px-3 rounded border border-gray-300"
-                  value={spec.key}
-                  onChange={(event) => handleSpecificationChange(index, 'key', event.target.value)}
+                  {...register(`specifications.${index}.key`)}
+                  onPaste={handleSpecificationPaste}
                 />
                 <input
                   type="text"
                   placeholder="Giá trị"
                   className="outline-none py-2 px-3 rounded border border-gray-300"
-                  value={spec.value}
-                  onChange={(event) => handleSpecificationChange(index, 'value', event.target.value)}
+                  {...register(`specifications.${index}.value`)}
                 />
                 <button
                   type="button"

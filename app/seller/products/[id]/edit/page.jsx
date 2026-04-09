@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
@@ -17,6 +17,8 @@ const EditProductPage = () => {
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [product, setProduct] = useState(null)
+  const fetchedProductIdRef = useRef('')
+  const fetchingProductIdRef = useRef('')
 
   const fetchProductDetail = useCallback(async (signal) => {
     try {
@@ -38,18 +40,23 @@ const EditProductPage = () => {
 
       if (!data.success) {
         toast.error(data.message || 'Không thể tải thông tin sản phẩm')
+        fetchedProductIdRef.current = ''
         router.push('/seller/product-list')
         return
       }
 
       setProduct(data.product)
+      fetchedProductIdRef.current = String(id)
     } catch (error) {
       if (error?.code === 'ERR_CANCELED') {
+        fetchedProductIdRef.current = ''
         return
       }
+      fetchedProductIdRef.current = ''
       toast.error(error.response?.data?.message || error.message)
       router.push('/seller/product-list')
     } finally {
+      fetchingProductIdRef.current = ''
       if (!signal?.aborted) {
         setLoading(false)
       }
@@ -57,15 +64,24 @@ const EditProductPage = () => {
   }, [getToken, id, router])
 
   useEffect(() => {
-    if (!user) return
+    fetchedProductIdRef.current = ''
+    fetchingProductIdRef.current = ''
+  }, [id])
 
+  useEffect(() => {
+    if (!user?.id) return
+    if (fetchedProductIdRef.current === String(id)) return
+    if (fetchingProductIdRef.current === String(id)) return
+
+    fetchingProductIdRef.current = String(id)
+    fetchedProductIdRef.current = String(id)
     const controller = new AbortController()
     fetchProductDetail(controller.signal)
 
     return () => {
       controller.abort()
     }
-  }, [user, fetchProductDetail])
+  }, [user?.id, id, fetchProductDetail])
 
   const handleUpdateProduct = async (payload) => {
     const formData = new FormData()
