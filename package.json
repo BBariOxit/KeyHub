@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^7.0.1",
+    "@hookform/resolvers": "^5.2.2",
     "@tiptap/pm": "^3.22.3",
     "@tiptap/react": "^3.22.3",
     "@tiptap/starter-kit": "^3.22.3",
@@ -21,8 +22,10 @@
     "lucide-react": "^1.7.0",
     "mongoose": "^9.2.4",
     "next": "^15.5.9",
+    "next-cloudinary": "^6.17.5",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
+    "react-hook-form": "^7.72.1",
     "react-hot-toast": "^2.5.1",
     "zod": "^4.3.6"
   },

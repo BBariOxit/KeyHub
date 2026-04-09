@@ -121,7 +121,7 @@ export const syncProductReviewSummary = inngest.createFunction(
     id: 'sync-product-review-summary'
   },
   {
-    event: 'product/review.created'
+    event: 'product/review.changed'
   },
   async ({ event, step }) => {
     const rawProductId = String(event?.data?.productId || '')

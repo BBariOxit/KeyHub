@@ -1,6 +1,5 @@
 "use client"
 import { useEffect, useMemo, useState } from "react";
-import { assets } from "@/assets/assets";
 import ProductCard from "@/components/ProductCard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -13,6 +12,8 @@ import React from "react";
 import { formatVnd } from "@/lib/price";
 import { optimizeCloudinaryImage } from "@/lib/image";
 import DOMPurify from "isomorphic-dompurify";
+import ProductReviewsSection from "@/components/reviews/ProductReviewsSection";
+import StarDisplay from "@/components/StarDisplay";
 
 const Product = () => {
     const SPECIFICATIONS_PREVIEW_LIMIT = 6
@@ -23,6 +24,10 @@ const Product = () => {
 
     const [mainImage, setMainImage] = useState(null);
     const [isSpecificationExpanded, setIsSpecificationExpanded] = useState(false)
+    const [liveReviewSummary, setLiveReviewSummary] = useState({
+        averageRating: null,
+        totalReviews: null
+    })
     const productData = useMemo(() => {
         return products.find((product) => product._id === id) || null;
     }, [products, id]);
@@ -76,11 +81,13 @@ const Product = () => {
         ? normalizedSpecifications
         : normalizedSpecifications.slice(0, SPECIFICATIONS_PREVIEW_LIMIT)
     const hasMoreSpecifications = normalizedSpecifications.length > SPECIFICATIONS_PREVIEW_LIMIT
-    const averageRating = Number.isFinite(productData?.averageRating)
-        ? Math.min(5, Math.max(0, productData.averageRating))
+    const resolvedAverageRating = liveReviewSummary.averageRating ?? productData?.averageRating
+    const resolvedTotalReviews = liveReviewSummary.totalReviews ?? productData?.totalReviews
+    const averageRating = Number.isFinite(resolvedAverageRating)
+        ? Math.min(5, Math.max(0, resolvedAverageRating))
         : 0
-    const totalReviews = Number.isFinite(productData?.totalReviews)
-        ? Math.max(0, productData.totalReviews)
+    const totalReviews = Number.isFinite(resolvedTotalReviews)
+        ? Math.max(0, resolvedTotalReviews)
         : 0
 
     useEffect(() => {
@@ -89,6 +96,13 @@ const Product = () => {
 
     useEffect(() => {
         setIsSpecificationExpanded(false)
+    }, [id])
+
+    useEffect(() => {
+        setLiveReviewSummary({
+            averageRating: null,
+            totalReviews: null
+        })
     }, [id])
 
     return productData ? (<>
@@ -137,16 +151,12 @@ const Product = () => {
                         {productData.name}
                     </h1>
                     <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-0.5">
-                            {[0, 1, 2, 3, 4].map((index) => (
-                                <Image
-                                    key={index}
-                                    className="h-4 w-4"
-                                    src={index < Math.floor(averageRating) ? assets.star_icon : assets.star_dull_icon}
-                                    alt="star_icon"
-                                />
-                            ))}
-                        </div>
+                        <StarDisplay
+                            rating={averageRating}
+                            size={16}
+                            activeClassName="text-orange-500"
+                            inactiveClassName="text-orange-200"
+                        />
                         <p>({averageRating.toFixed(1)} - {totalReviews} đánh giá)</p>
                     </div>
                     <p className="text-gray-600 mt-3">
@@ -251,6 +261,19 @@ const Product = () => {
                         </button>
                     )}
                 </aside>
+            </section>
+
+            <section className="pt-2">
+                <h2 className="text-2xl font-semibold text-gray-900 mb-4">Đánh giá sản phẩm</h2>
+                <ProductReviewsSection
+                    productId={productData._id}
+                    onSummaryChange={(summary) => {
+                        setLiveReviewSummary({
+                            averageRating: Number(summary?.averageRating || 0),
+                            totalReviews: Number(summary?.totalReviews || 0)
+                        })
+                    }}
+                />
             </section>
 
             <div className="flex flex-col items-center">

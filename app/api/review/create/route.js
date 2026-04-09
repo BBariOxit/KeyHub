@@ -3,6 +3,7 @@ import { inngest } from "@/config/inngest";
 import Product from "@/models/Product";
 import Review from "@/models/Review";
 import { getAuth } from "@clerk/nextjs/server";
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import z from "zod";
 
@@ -22,7 +23,7 @@ const reviewCreateSchema = z.object({
         .map((item) => String(item || "").trim())
         .filter(Boolean)
     },
-    z.array(z.string().max(1000, "Đường dẫn ảnh quá dài")).max(10, "Tối đa 10 ảnh")
+    z.array(z.string().max(1000, "Đường dẫn ảnh quá dài")).max(4, "Tối đa 4 ảnh")
   ).optional().default([])
 })
 
@@ -79,7 +80,7 @@ export async function POST(req) {
     // Fire and forget: user gets fast response while aggregate runs in background.
     try {
       await inngest.send({
-        name: "product/review.created",
+        name: "product/review.changed",
         data: {
           productId
         }
@@ -87,6 +88,10 @@ export async function POST(req) {
     } catch (inngestError) {
       console.error("Review event dispatch error:", inngestError)
     }
+
+    revalidatePath(`/product/${productId}`)
+    revalidatePath('/all-products')
+    revalidatePath('/')
 
     return NextResponse.json({
       success: true,

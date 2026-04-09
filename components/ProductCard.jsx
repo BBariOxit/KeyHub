@@ -1,13 +1,11 @@
 import React, { useState } from 'react'
-import { assets } from '@/assets/assets'
 import Image from 'next/image';
 import Link from 'next/link';
 import { useAppContext } from '@/context/AppContext';
 import { formatVnd } from '@/lib/price';
 import { optimizeCloudinaryImage } from '@/lib/image';
 import { Heart } from 'lucide-react';
-
-const STAR_INDICES = [0, 1, 2, 3, 4]
+import StarDisplay from '@/components/StarDisplay';
 
 const ProductCard = ({ product }) => {
 
@@ -89,20 +87,12 @@ const ProductCard = ({ product }) => {
             <p className="w-full text-xs text-gray-500/70 max-sm:hidden truncate">{product.description}</p>
             <div className="flex items-center gap-2">
                 <p className="text-xs">{rating.toFixed(1)}</p>
-                <div className="flex items-center gap-0.5">
-                    {STAR_INDICES.map((index) => (
-                        <Image
-                            key={index}
-                            className="h-3 w-3"
-                            src={
-                                index < Math.floor(rating)
-                                    ? assets.star_icon
-                                    : assets.star_dull_icon
-                            }
-                            alt="star_icon"
-                        />
-                    ))}
-                </div>
+                <StarDisplay
+                    rating={rating}
+                    size={12}
+                    activeClassName="text-orange-500"
+                    inactiveClassName="text-orange-200"
+                />
                 <p className="text-[11px] text-gray-500">({totalReviews})</p>
             </div>
 
