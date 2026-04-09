@@ -95,7 +95,7 @@ export async function POST(req) {
         return { error: 'Địa chỉ giao hàng không hợp lệ.' }
       }
 
-      const products = await Product.find({ _id: { $in: productIds } })
+      const products = await Product.find({ _id: { $in: productIds }, isVisible: { $ne: false } })
         .session(session)
         .select('_id offerPrice stock')
         .lean()

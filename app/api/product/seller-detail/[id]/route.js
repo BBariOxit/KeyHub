@@ -39,6 +39,7 @@ export async function GET(req, context) {
       price: 1,
       offerPrice: 1,
       stock: 1,
+      isVisible: 1,
       image: 1,
       category: 1,
       timestamp: 1

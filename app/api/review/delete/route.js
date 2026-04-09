@@ -1,5 +1,6 @@
 import connectDB from "@/config/db";
 import { inngest } from "@/config/inngest";
+import { cleanupCloudinaryImages } from "@/lib/cloudinaryCleanup";
 import Review from "@/models/Review";
 import { getAuth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
@@ -34,14 +35,17 @@ export async function POST(req) {
     await connectDB()
 
     const { reviewId } = validation.data
-    const review = await Review.findOne({ _id: reviewId, userId }).select("_id productId")
+    const review = await Review.findOne({ _id: reviewId, userId }).select("_id productId images")
 
     if (!review) {
       return NextResponse.json({ success: false, message: "Không tìm thấy đánh giá để xóa." }, { status: 404 })
     }
 
     const productId = String(review.productId)
+    const reviewImages = Array.isArray(review.images) ? review.images : []
     await Review.deleteOne({ _id: review._id, userId })
+
+    await cleanupCloudinaryImages(reviewImages, { errorPrefix: "Review image cleanup error:" })
 
     try {
       await inngest.send({

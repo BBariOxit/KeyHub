@@ -26,6 +26,7 @@ export async function GET(req) {
       image: 1,
       category: 1,
       offerPrice: 1,
+      isVisible: 1,
       stock: 1
     }
 
@@ -80,6 +81,7 @@ export async function GET(req) {
 
       return {
         ...product,
+        isVisible: product?.isVisible !== false,
         categoryIds: serializedCategoryIds,
         categoryNames: resolvedCategoryNames,
         category: resolvedCategoryNames.join(', '),
