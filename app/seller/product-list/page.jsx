@@ -259,12 +259,12 @@ const ProductList = () => {
                         type="button"
                         onClick={() => handleToggleVisibility(product._id, product.isVisible)}
                         disabled={Boolean(pendingVisibilityIds[product._id])}
-                        className={`relative inline-flex h-7 w-12 items-center rounded-full border transition ${product.isVisible ? 'bg-emerald-500 border-emerald-500' : 'bg-gray-300 border-gray-300'} ${pendingVisibilityIds[product._id] ? 'opacity-70 cursor-not-allowed' : ''}`}
+                        className={`relative inline-flex h-6 w-10 items-center rounded-full border transition ${product.isVisible ? 'bg-emerald-500 border-emerald-500' : 'bg-gray-300 border-gray-300'} ${pendingVisibilityIds[product._id] ? 'opacity-70 cursor-not-allowed' : ''}`}
                         aria-label={product.isVisible ? 'Ẩn sản phẩm' : 'Hiện sản phẩm'}
                         title={product.isVisible ? 'Đang hiển thị - bấm để ẩn' : 'Đang ẩn - bấm để hiện'}
                       >
                         <span
-                          className={`inline-block h-5 w-5 transform rounded-full bg-white transition ${product.isVisible ? 'translate-x-6' : 'translate-x-1'}`}
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${product.isVisible ? 'translate-x-5' : 'translate-x-1'}`}
                         />
                       </button>
                     </div>

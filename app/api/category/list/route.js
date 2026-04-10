@@ -2,7 +2,8 @@ import connectDB from "@/config/db";
 import Category from "@/models/Category";
 import { NextResponse } from "next/server";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function GET() {
   try {

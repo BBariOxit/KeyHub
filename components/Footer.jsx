@@ -1,6 +1,7 @@
 import React from "react";
 import { assets } from "@/assets/assets";
 import Image from "next/image";
+import Link from "next/link";
 
 const Footer = () => {
   return (
@@ -21,13 +22,13 @@ const Footer = () => {
             <h2 className="font-medium text-gray-900 mb-5">Công ty</h2>
             <ul className="text-sm space-y-2">
               <li>
-                <a className="hover:underline transition" href="#">Trang chủ</a>
+                <Link className="hover:underline transition" href="/">Trang chủ</Link>
               </li>
               <li>
-                <a className="hover:underline transition" href="#">Giới thiệu</a>
+                <Link className="hover:underline transition" href="/about">Giới thiệu</Link>
               </li>
               <li>
-                <a className="hover:underline transition" href="#">Liên hệ</a>
+                <Link className="hover:underline transition" href="/contact">Liên hệ</Link>
               </li>
               <li>
                 <a className="hover:underline transition" href="#">Chính sách bảo mật</a>
@@ -48,6 +49,9 @@ const Footer = () => {
       </div>
       <p className="py-4 text-center text-xs md:text-sm">
         Copyright 2026 © KeyHub. All rights reserved.
+      </p>
+      <p className="pb-4 text-center text-[11px] text-gray-400">
+        Vận hành bởi Phan Thái Bảo - Founder & Fullstack Developer
       </p>
     </footer>
   );
