@@ -22,6 +22,53 @@ const HomeProducts = ({ initialProducts = [], initialPagination }) => {
     setHasMore(Boolean(initialPagination?.hasMore))
   }, [initialProducts, initialPagination?.hasMore, initialPagination?.page])
 
+  React.useEffect(() => {
+    if (!Array.isArray(products) || products.length === 0) {
+      return
+    }
+
+    setDisplayProducts((previousProducts) => {
+      if (!Array.isArray(previousProducts) || previousProducts.length === 0) {
+        return previousProducts
+      }
+
+      const nextById = new Map(
+        products
+          .filter((item) => item?._id)
+          .map((item) => [String(item._id), item])
+      )
+
+      let hasChanges = false
+      const mergedProducts = previousProducts.map((item) => {
+        const freshItem = nextById.get(String(item?._id))
+        if (!freshItem) {
+          return item
+        }
+
+        if (
+          freshItem.name !== item.name ||
+          freshItem.description !== item.description ||
+          freshItem.price !== item.price ||
+          freshItem.offerPrice !== item.offerPrice ||
+          freshItem.category !== item.category ||
+          freshItem.stock !== item.stock ||
+          freshItem.isVisible !== item.isVisible ||
+          JSON.stringify(freshItem.image || []) !== JSON.stringify(item.image || [])
+        ) {
+          hasChanges = true
+          return {
+            ...item,
+            ...freshItem
+          }
+        }
+
+        return item
+      })
+
+      return hasChanges ? mergedProducts : previousProducts
+    })
+  }, [products])
+
   const visibleProducts = displayProducts.length > 0 ? displayProducts : products
   const totalProducts = Number.isFinite(initialPagination?.total) ? initialPagination.total : null
   const initialSkeletonCount = totalProducts === null

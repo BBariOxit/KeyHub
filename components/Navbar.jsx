@@ -29,10 +29,10 @@ const Navbar = () => {
         <Link href="/all-products" className="hover:text-gray-900 transition">
           Cửa hàng
         </Link>
-        <Link href="/" className="hover:text-gray-900 transition">
+        <Link href="/about" className="hover:text-gray-900 transition">
           Giới thiệu
         </Link>
-        <Link href="/" className="hover:text-gray-900 transition">
+        <Link href="/contact" className="hover:text-gray-900 transition">
           Liên hệ
         </Link>
 
@@ -75,6 +75,12 @@ const Navbar = () => {
                 </UserButton.MenuItems>
                 <UserButton.MenuItems>
                   <UserButton.Action label="Products" labelIcon={<BoxIcon />} onClick={() => router.push('/all-products')}/>
+                </UserButton.MenuItems>
+                <UserButton.MenuItems>
+                  <UserButton.Action label="About" labelIcon={<BoxIcon />} onClick={() => router.push('/about')}/>
+                </UserButton.MenuItems>
+                <UserButton.MenuItems>
+                  <UserButton.Action label="Contact" labelIcon={<BoxIcon />} onClick={() => router.push('/contact')}/>
                 </UserButton.MenuItems>
                 <UserButton.MenuItems>
                   <UserButton.Action label="Cart" labelIcon={<CartIcon />} onClick={() => router.push('/cart')}/>

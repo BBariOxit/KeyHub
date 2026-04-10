@@ -3,6 +3,7 @@ import authSeller from "@/lib/authSeller";
 import Category from "@/models/Category";
 import Product from "@/models/Product";
 import { getAuth } from "@clerk/nextjs/server";
+import { revalidatePath } from "next/cache";
 import { v2 as cloudinary } from "cloudinary";
 import { NextResponse } from "next/server";
 import z from "zod";
@@ -379,6 +380,10 @@ export async function POST(req) {
       { $set: updatePayload },
       { new: true }
     ).lean();
+
+    revalidatePath("/");
+    revalidatePath("/all-products");
+    revalidatePath(`/product/${productId}`);
 
     return NextResponse.json({ success: true, message: "Cập nhật sản phẩm thành công.", product: updatedProduct });
   } catch (error) {

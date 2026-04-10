@@ -2,6 +2,7 @@ import connectDB from "@/config/db";
 import authSeller from "@/lib/authSeller";
 import Category from "@/models/Category";
 import { getAuth } from "@clerk/nextjs/server";
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import z from "zod";
 
@@ -91,6 +92,10 @@ export async function POST(req) {
       slug: generatedSlug,
       description: description || ""
     });
+
+    revalidatePath("/api/category/list");
+    revalidatePath("/seller/categories");
+    revalidatePath("/seller");
 
     return NextResponse.json({ success: true, category });
   } catch (error) {
