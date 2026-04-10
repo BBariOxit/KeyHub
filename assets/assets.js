@@ -7,6 +7,14 @@ import arrow_icon_white from "./arrow_icon_white.svg";
 import arrow_right_icon_colored from "./arrow_right_icon_colored.svg";
 import banner_1 from "./banner-1.png";
 import banner_2 from "./banner-2.png";
+import about_us_1 from "./about-us-1.jpg";
+import about_us_2 from "./about-us-2.jpg";
+import about_us_3 from "./about-us-3.jpg";
+import about_us_4 from "./about-us-4.jpg";
+import about_us_5 from "./about-us-5.jpg";
+import about_us_6 from "./about-us-6.jpg";
+import about_us_7 from "./about-us-7.jpg";
+import about_us_8 from "./about-us-8.jpg";
 import checkmark from "./checkmark.png";
 import decrease_arrow from "./decrease_arrow.svg";
 import facebook_icon from "./facebook_icon.svg";
@@ -49,6 +57,14 @@ export const assets = {
   star_dull_icon,
   upload_area,
   checkmark,
+  about_us_1,
+  about_us_2,
+  about_us_3,
+  about_us_4,
+  about_us_5,
+  about_us_6,
+  about_us_7,
+  about_us_8,
   banner_1,
   banner_2,
   feature_pro_1,

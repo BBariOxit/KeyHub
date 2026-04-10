@@ -1,5 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { assets } from "@/assets/assets";
+import Image from "next/image";
 import { ArrowDown, ChevronRight } from "lucide-react";
 
 export const metadata = {
@@ -14,7 +16,7 @@ export default function AboutPage() {
       <main className="bg-white overflow-hidden">
         <section className="relative px-6 md:px-16 lg:px-32 pt-16 md:pt-24 pb-20" data-animate-group="hero">
           <div className="max-w-5xl">
-            {/* <p className="inline-flex items-center gap-2 text-sm font-semibold text-orange-700 bg-orange-100 px-3 py-1 rounded-full js-reveal" data-animate="fade-up">
+            {/* <p className="inline-flex items-center gap-2 text-sm font-semibold text-orange-600 bg-orange-100 px-3 py-1 rounded-full js-reveal" data-animate="fade-up">
               Câu chuyện KeyHub
             </p> */}
             <h1 className="mt-5 text-4xl md:text-4xl font-bold text-gray-900 leading-tight js-reveal" data-animate="fade-up" data-delay="100">
@@ -27,9 +29,30 @@ export default function AboutPage() {
             </p>
           </div>
 
-          <div className="mt-10 grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-5" data-animate="stagger" data-delay="300">
-            <div className="aspect-[16/9] rounded-3xl border-2 border-dashed border-orange-300 bg-orange-50 js-parallax" data-speed="0.2" aria-label="hero-image-wide" />
-            <div className="aspect-[4/5] rounded-3xl border-2 border-dashed border-gray-300 bg-white js-parallax" data-speed="0.35" aria-label="hero-image-tall" />
+          <div className="mt-10 grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-5" data-animate="stagger" data-delay="300">
+            <div className="relative overflow-hidden rounded-3xl h-[240px] sm:h-[300px] lg:h-[420px] js-parallax" data-speed="0.2" aria-label="hero-image-wide">
+              <Image
+                src={assets.about_us_1}
+                alt="Không gian làm việc với bàn phím cơ tại KeyHub"
+                fill
+                priority
+                placeholder="blur"
+                quality={80}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 60vw"
+                className="object-cover"
+              />
+            </div>
+            <div className="relative overflow-hidden rounded-3xl h-[240px] sm:h-[300px] lg:h-[420px] js-parallax" data-speed="0.35" aria-label="hero-image-tall">
+              <Image
+                src={assets.about_us_2}
+                alt="Cận cảnh bàn phím cơ và setup góc làm việc"
+                fill
+                placeholder="blur"
+                quality={78}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 40vw"
+                className="object-cover"
+              />
+            </div>
           </div>
 
           <a href="#about-story" className="mt-10 inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition js-reveal" data-animate="fade-up" data-delay="400">
@@ -41,7 +64,7 @@ export default function AboutPage() {
         <section id="about-story" className="px-6 md:px-16 lg:px-32 pb-20" data-animate-group="story">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             <div className="space-y-4 js-reveal" data-animate="slide-right">
-              <p className="text-sm font-semibold text-orange-700">01. Bắt đầu từ trải nghiệm gõ</p>
+              <p className="text-sm font-semibold text-orange-600">01. Bắt đầu từ trải nghiệm gõ</p>
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Không chỉ bán bàn phím, mà bán cảm giác muốn gõ tiếp.</h2>
               <p className="text-gray-600 leading-relaxed">
                 Những mẫu lên kệ tại KeyHub không được chọn vì chạy trend ngắn hạn, mà vì dùng thật ổn trong
@@ -54,13 +77,23 @@ export default function AboutPage() {
               </p>
             </div>
 
-            <div className="aspect-[4/3] rounded-3xl border-2 border-dashed border-gray-300 bg-white js-reveal" data-animate="zoom-in" aria-label="story-image" />
+            <div className="relative overflow-hidden aspect-[4/3] rounded-3xl js-reveal" data-animate="zoom-in" aria-label="story-image">
+              <Image
+                src={assets.about_us_3}
+                alt="Góc setup bàn phím cơ trong không gian làm việc"
+                fill
+                placeholder="blur"
+                quality={78}
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover"
+              />
+            </div>
           </div>
         </section>
 
         <section className="px-6 md:px-16 lg:px-32 pb-20" data-animate-group="milestones">
           <div className="rounded-3xl border border-gray-200 bg-white p-6 md:p-10 shadow-sm">
-            <p className="text-sm font-semibold text-orange-700 js-reveal" data-animate="fade-up">02. Cột mốc phát triển</p>
+            <p className="text-sm font-semibold text-orange-600 js-reveal" data-animate="fade-up">02. Cột mốc phát triển</p>
             <h2 className="mt-3 text-3xl md:text-4xl font-bold text-gray-900 js-reveal" data-animate="fade-up" data-delay="100">
               Từng bước mở rộng, nhưng luôn giữ một tiêu chuẩn phục vụ nhất quán
             </h2>
@@ -84,7 +117,7 @@ export default function AboutPage() {
                 },
               ].map((item, index) => (
                 <article key={item.label} className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 rounded-2xl border border-gray-200 p-4 js-reveal" data-animate="fade-up" data-delay={150 + index * 100}>
-                  <div className="text-sm font-semibold text-orange-700">{item.label}</div>
+                  <div className="text-sm font-semibold text-orange-600">{item.label}</div>
                   <div>
                     <p className="font-semibold text-gray-900">{item.title}</p>
                     <p className="mt-1 text-sm text-gray-600">{item.description}</p>
@@ -98,7 +131,7 @@ export default function AboutPage() {
         <section className="px-6 md:px-16 lg:px-32 pb-20" data-animate-group="gallery">
           <div className="flex items-end justify-between gap-4">
             <div>
-              <p className="text-sm font-semibold text-orange-700 js-reveal" data-animate="fade-up">03. Bộ ảnh thương hiệu</p>
+              <p className="text-sm font-semibold text-orange-600 js-reveal" data-animate="fade-up">03. Bộ ảnh thương hiệu</p>
               <h2 className="mt-2 text-3xl md:text-4xl font-bold text-gray-900 js-reveal" data-animate="fade-up" data-delay="100">Khoảnh khắc sản phẩm trong setup đời thực</h2>
               <p className="mt-3 text-gray-600 max-w-3xl js-reveal" data-animate="fade-up" data-delay="150">
                 Khu vực này dành cho ảnh sản phẩm thực tế, ảnh góc làm việc, và các shot cận cảnh chi tiết hoàn thiện.
@@ -108,17 +141,66 @@ export default function AboutPage() {
           </div>
 
           <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4" data-animate="stagger" data-delay="150">
-            <div className="md:col-span-2 aspect-[16/10] rounded-3xl border-2 border-dashed border-orange-300 bg-orange-50 js-parallax" data-speed="0.2" aria-label="gallery-image-01" />
-            <div className="aspect-[4/5] rounded-3xl border-2 border-dashed border-gray-300 bg-white js-parallax" data-speed="0.25" aria-label="gallery-image-02" />
-            <div className="aspect-square rounded-3xl border-2 border-dashed border-gray-300 bg-white js-parallax" data-speed="0.15" aria-label="gallery-image-03" />
-            <div className="aspect-square rounded-3xl border-2 border-dashed border-gray-300 bg-white js-parallax" data-speed="0.3" aria-label="gallery-image-04" />
-            <div className="aspect-square rounded-3xl border-2 border-dashed border-gray-300 bg-white js-parallax" data-speed="0.18" aria-label="gallery-image-05" />
+            <div className="relative overflow-hidden md:col-span-2 aspect-[16/10] rounded-3xl js-parallax" data-speed="0.2" aria-label="gallery-image-01">
+              <Image
+                src={assets.about_us_4}
+                alt="Bàn phím cơ trong góc làm việc tối giản"
+                fill
+                placeholder="blur"
+                quality={78}
+                sizes="(max-width: 768px) 100vw, 66vw"
+                className="object-cover"
+              />
+            </div>
+            <div className="relative overflow-hidden aspect-[4/5] rounded-3xl js-parallax" data-speed="0.25" aria-label="gallery-image-02">
+              <Image
+                src={assets.about_us_5}
+                alt="Ảnh cận chi tiết keycap và switch bàn phím"
+                fill
+                placeholder="blur"
+                quality={76}
+                sizes="(max-width: 768px) 100vw, 34vw"
+                className="object-cover"
+              />
+            </div>
+            <div className="relative overflow-hidden aspect-square rounded-3xl js-parallax" data-speed="0.15" aria-label="gallery-image-03">
+              <Image
+                src={assets.about_us_6}
+                alt="Bàn phím cơ trong setup làm việc ban đêm"
+                fill
+                placeholder="blur"
+                quality={76}
+                sizes="(max-width: 768px) 100vw, 33vw"
+                className="object-cover"
+              />
+            </div>
+            <div className="relative overflow-hidden aspect-square rounded-3xl js-parallax" data-speed="0.3" aria-label="gallery-image-04">
+              <Image
+                src={assets.about_us_7}
+                alt="Góc máy nhấn vào bố cục keycap nổi bật"
+                fill
+                placeholder="blur"
+                quality={76}
+                sizes="(max-width: 768px) 100vw, 33vw"
+                className="object-cover"
+              />
+            </div>
+            <div className="relative overflow-hidden aspect-square rounded-3xl js-parallax" data-speed="0.18" aria-label="gallery-image-05">
+              <Image
+                src={assets.about_us_8}
+                alt="Bộ ảnh thương hiệu bàn phím cơ KeyHub"
+                fill
+                placeholder="blur"
+                quality={76}
+                sizes="(max-width: 768px) 100vw, 33vw"
+                className="object-cover"
+              />
+            </div>
           </div>
         </section>
 
         <section className="px-6 md:px-16 lg:px-32 pb-24" data-animate-group="cta">
           <div className="rounded-3xl border border-orange-200 bg-orange-50/70 p-8 md:p-12">
-            <p className="text-sm font-semibold text-orange-700 js-reveal" data-animate="fade-up">04. Call to action cuối trang</p>
             <h2 className="mt-3 text-3xl md:text-4xl font-bold text-gray-900 js-reveal" data-animate="fade-up" data-delay="100">
               Nếu bạn đang tìm một chiếc bàn phím dùng lâu dài, KeyHub sẵn sàng đồng hành từ lúc chọn đến lúc sử dụng.
             </h2>
