@@ -1,6 +1,30 @@
-import { clerkMiddleware } from '@clerk/nextjs/server';
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
 
-export default clerkMiddleware();
+const isSellerRoute = createRouteMatcher(['/seller(.*)']);
+
+export default clerkMiddleware(async (auth, req) => {
+  if (!isSellerRoute(req)) {
+    return NextResponse.next();
+  }
+
+  const { userId, sessionClaims } = await auth();
+  const role =
+    sessionClaims?.metadata?.role ??
+    sessionClaims?.publicMetadata?.role ??
+    sessionClaims?.public_metadata?.role;
+
+  if (!userId || role !== 'seller') {
+    return new NextResponse('403 | Forbidden', {
+      status: 403,
+      headers: {
+        'content-type': 'text/plain; charset=utf-8',
+      },
+    });
+  }
+
+  return NextResponse.next();
+});
 
 export const config = {
   matcher: [
