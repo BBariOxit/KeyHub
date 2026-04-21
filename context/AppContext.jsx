@@ -30,7 +30,8 @@ export const AppContextProvider = (props) => {
     const { getToken, isSignedIn } = useAuth()
     const getTokenRef = useRef(getToken)
     const userId = user?.id || null
-    const userRole = user?.publicMetadata?.role
+    const roleString = user?.publicMetadata?.role;
+    const userRole = typeof roleString === 'string' ? roleString.toLowerCase() : '';
 
     const [products, setProducts] = useState([])
     const [sellerProducts, setSellerProducts] = useState([])

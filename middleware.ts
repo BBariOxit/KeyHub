@@ -1,4 +1,4 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { clerkMiddleware, createRouteMatcher, clerkClient } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
 const isSellerRoute = createRouteMatcher(['/seller(.*)']);
@@ -9,12 +9,27 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   const { userId, sessionClaims } = await auth();
-  const role =
+
+  let role =
     sessionClaims?.metadata?.role ??
     sessionClaims?.publicMetadata?.role ??
     sessionClaims?.public_metadata?.role;
 
-  if (!userId || role !== 'seller') {
+  // Fallback if publicMetadata is not properly configured in the session token template
+  if (userId && !role) {
+    try {
+      const client = await clerkClient();
+      const user = await client.users.getUser(userId);
+      role = user?.publicMetadata?.role;
+    } catch (error) {
+      console.error("Error fetching user role inside middleware:", error);
+    }
+  }
+
+  const normalizedRole = typeof role === 'string' ? role.toLowerCase() : '';
+
+  // Only block if not logged in or if the role is not seller
+  if (!userId || normalizedRole !== 'seller') {
     return new NextResponse('403 | Forbidden', {
       status: 403,
       headers: {
