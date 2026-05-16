@@ -92,8 +92,14 @@ npm run lint    # eslint
 
 ## Demo & Screenshots
 
-- Live demo: (thêm link Vercel/Deploy của bạn vào đây)
-- Screenshots/GIF: (thêm ảnh vào thư mục `public/` rồi link ở đây)
+- Live demo: https://keyhub.cobweb.id.vn
+- Screenshots/GIF:
+
+	![Homepage](public/screenshot-home.png)
+
+	![Product detail (top)](public/screenshot-product-top.png)
+
+	![Product detail (description/spec)](public/screenshot-product-detail.png)
 
 ## Contributing
 
