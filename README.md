@@ -108,5 +108,4 @@ npm run lint    # eslint
 3. Chạy `npm run lint` trước khi mở PR
 
 ## License
-
-Hiện chưa khai báo license. Nếu bạn muốn open‑source, mình có thể thêm file `LICENSE` (MIT) và cập nhật README cho khớp.
+MIT
