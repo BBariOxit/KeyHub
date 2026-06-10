@@ -13,10 +13,8 @@ export const inngest = new Inngest({ id: "keyhub" });
 // inngest func to save user data to a database
 export const syncUserCreation = inngest.createFunction(
   {
-    id:'sync-user-from-clerk'
-  },
-  {
-    event: 'clerk/user.created'
+    id:'sync-user-from-clerk',
+    triggers: [{ event: 'clerk/user.created' }]
   },
   async ({event, step}) => {
     const { id, first_name, last_name, email_addresses, image_url } = event.data
@@ -38,10 +36,8 @@ export const syncUserCreation = inngest.createFunction(
 // inngest func to update user data to a database
 export const syncUserUpdation = inngest.createFunction(
   {
-    id: 'update-user-from-clerk'
-  },
-  {
-    event: 'clerk/user.updated'
+    id: 'update-user-from-clerk',
+    triggers: [{ event: 'clerk/user.updated' }]
   },
   async ({event, step}) => {
     const { id, first_name, last_name, email_addresses, image_url } = event.data
@@ -63,10 +59,8 @@ export const syncUserUpdation = inngest.createFunction(
 // inngest func to delete user data to a database
 export const syncUserDeletion = inngest.createFunction(
   {
-    id: 'delete-user-with-clerk'
-  },
-  { 
-    event: 'clerk/user.deleted'
+    id: 'delete-user-with-clerk',
+    triggers: [{ event: 'clerk/user.deleted' }]
   },
   async ({event, step}) => {
     const { id } = event.data
@@ -86,10 +80,8 @@ export const createUserOrder = inngest.createFunction(
     batchEvents: {
       maxSize: 5,
       timeout: '5s'
-    }
-  },
-  {
-    event: 'order/created'
+    },
+    triggers: [{ event: 'order/created' }]
   },
   async ({events, step}) => {
     const orders = events.map((event) => {
@@ -118,10 +110,8 @@ export const createUserOrder = inngest.createFunction(
 // inngest func to recompute product rating summary when review changes
 export const syncProductReviewSummary = inngest.createFunction(
   {
-    id: 'sync-product-review-summary'
-  },
-  {
-    event: 'product/review.changed'
+    id: 'sync-product-review-summary',
+    triggers: [{ event: 'product/review.changed' }]
   },
   async ({ event, step }) => {
     const rawProductId = String(event?.data?.productId || '')
