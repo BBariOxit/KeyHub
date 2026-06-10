@@ -9,6 +9,8 @@ import User from "@/models/User";
 
 const beVietnamPro = Be_Vietnam_Pro({ subsets: ['latin', 'vietnamese'], weight: ["400", "500", "600", "700"] })
 
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
   title: "Keyhub",
   description: "E-Commerce with Next.js ",
