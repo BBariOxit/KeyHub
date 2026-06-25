@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  keyhub:
+    image: ${DOCKERHUB_USERNAME:-your-dockerhub-username}/keyhub:latest
+    container_name: keyhub-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
