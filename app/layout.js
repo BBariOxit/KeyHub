@@ -35,6 +35,9 @@ async function getInitialFavoriteIds() {
       ? user.favorites.map((id) => String(id)).filter(Boolean)
       : [];
   } catch (error) {
+    if (error?.digest === 'DYNAMIC_SERVER_USAGE') {
+      throw error;
+    }
     console.error("Initial favorites prefetch error:", error);
     return [];
   }
