@@ -24,4 +24,4 @@ ENV NODE_ENV=production
 EXPOSE 3000
 
 # Lệnh khởi chạy app khi container start
-CMD ["npm", "start"]
+CMD ["node", ".next/standalone/server.js"]
