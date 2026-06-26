@@ -29,6 +29,12 @@ ENV NEXT_PUBLIC_CURRENCY=$NEXT_PUBLIC_CURRENCY
 # Build dự án (Next.js sẽ tự động tối ưu hóa bằng Turbopack nếu mày có cấu hình)
 RUN npm run build
 
+# BẮT BUỘC: Copy thư mục public và static vào trong thư mục standalone
+# Vì chế độ output: 'standalone' không tự động bao gồm 2 thư mục này.
+# Nếu không copy, Next.js server (server.js) sẽ không tìm thấy ảnh và file CSS/JS giao diện gây ra lỗi 404.
+RUN cp -r public .next/standalone/public
+RUN cp -r .next/static .next/standalone/.next/static
+
 # Khai báo biến môi trường production
 ENV NODE_ENV=production
 
