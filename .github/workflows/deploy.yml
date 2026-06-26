@@ -33,6 +33,11 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/keyhub:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+            NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=${{ secrets.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME }}
+            NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=${{ secrets.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET }}
+            NEXT_PUBLIC_CURRENCY=${{ secrets.NEXT_PUBLIC_CURRENCY }}
 
   deploy:
     needs: build-and-push
